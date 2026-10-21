@@ -1,0 +1,6 @@
+# Install CPU torch from https://download.pytorch.org/whl/cpu separately.
+torch==2.6.0
+transformers==4.51.3
+huggingface-hub==0.36.2
+tokenizers==0.21.4
+-r requirements-translation.txt

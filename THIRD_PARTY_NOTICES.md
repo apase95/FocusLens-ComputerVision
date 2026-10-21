@@ -59,3 +59,27 @@ the software licenses. Weights are downloaded by PaddleOCR on first use and are
 official mirrors; consult the upstream license/model card for the exact artifact
 you download and before redistribution. This repository makes no independent
 assertion about training-data rights or artifacts not covered by those declarations.
+
+## EN→VI translation
+
+- Weights: [Helsinki-NLP/opus-mt-en-vi](https://huggingface.co/Helsinki-NLP/opus-mt-en-vi),
+  model card declares **Apache-2.0**, English → Vietnamese (`vie`, not `vie_Hani`).
+  Preparation pins revision `989c9fb9ec63987901022baf0182dcec3e149be6` and records
+  SHA256 for each downloaded artifact locally. INT8 is a derived local conversion;
+  neither original nor converted weights are redistributed. Retain upstream notices
+  when redistributing weights; model-card license is not a guarantee about data rights.
+- CTranslate2 4.6.0: MIT, https://github.com/OpenNMT/CTranslate2/blob/v4.6.0/LICENSE
+- SentencePiece 0.2.1: Apache-2.0, https://github.com/google/sentencepiece/blob/v0.2.1/LICENSE
+- Sacremoses 0.1.1: MIT, https://github.com/hplt-project/sacremoses/blob/master/LICENSE
+- Preparation only: Transformers 4.51.3 (Apache-2.0), PyTorch 2.6.0 (BSD-style),
+  Hugging Face Hub (Apache-2.0), Tokenizers (Apache-2.0). These are dependencies,
+  not vendored code. See their installed distribution notices for transitive terms.
+
+## Local IIIT5K benchmark (assets NOT distributed)
+
+Mishra, Alahari and Jawahar, “Scene Text Recognition using Higher Order Language
+Priors”, BMVC 2012. Original: https://cvit.iiit.ac.in/research/projects/cvit-projects/the-iiit-5k-word-dataset
+Local mirror: https://www.kaggle.com/datasets/prathmeshzade/iiit5k-words .
+Mirror Apache-2.0 metadata is not proof of rights in original images. Dataset,
+CSVs, lexicons and user photos remain ignored; no relicensing or redistribution.
+Benchmark uses mirror CSV labels (CSV/MAT equivalence not established), no lexicon.

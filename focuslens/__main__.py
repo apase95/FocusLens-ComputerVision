@@ -14,6 +14,9 @@ def main():
     camera.add_argument('output', type=Path)
     ocr = sub.add_parser('ocr')
     ocr.add_argument('images', nargs='+', type=Path)
+    translate = sub.add_parser('translate')
+    translate.add_argument('images', nargs='+', type=Path)
+    translate.add_argument('--enhance', action='store_true')
     args = parser.parse_args()
     if args.command == 'capture':
         frame = capture(args.url)
@@ -21,6 +24,17 @@ def main():
             out.write(frame.data)
         return
     from .ocr import engine, convert
+    if args.command == 'translate':
+        from .translation import Translator
+        from .pipeline import Pipeline
+        from .imaging import read_image
+        start = time.monotonic()
+        pipeline = Pipeline(engine(), Translator())
+        print(json.dumps({'initialization_seconds': time.monotonic() - start}))
+        for path in args.images:
+            result = pipeline.process(read_image(path), enhance=args.enhance)
+            print(json.dumps({'image': str(path), **result}, ensure_ascii=False))
+        return
     start = time.monotonic()
     model = engine()
     print(json.dumps({'initialization_seconds': time.monotonic() - start, 'device': 'cpu'}))

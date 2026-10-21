@@ -1,6 +1,7 @@
 # FocusLens stages 1–4
 
-All commands run from this project root. No translation, TTS or cloud service.
+Historical OCR-only notes below; current translation setup and benchmark are in
+[README.md](README.md). No TTS or paid cloud service.
 System Python 3.14.7 is unchanged. Installed runtime is isolated CPython 3.12.14.
 Official API reference: https://www.paddleocr.ai/main/en/quick_start.html
 Paddle 3.2.2 cp312 CPU wheel installed successfully from the package index.
@@ -23,7 +24,8 @@ keeps caches in ignored `.cache/`, saves text/confidence/polygons and timings in
 ignored `results/ocr-samples.json`. Standalone CLI uses library default cache;
 set PADDLE_PDX_CACHE_HOME to the project's .cache/paddlex to reuse batch models.
 Models are official PP-OCRv5_mobile_det and en_PP-OCRv4_mobile_rec; CPU, two
-threads, MKLDNN off; orientation/unwarping disabled. No preprocessing added.
+threads, MKLDNN off; orientation/unwarping disabled. Legacy OCR stays unchanged;
+the new pipeline offers optional mild preprocessing, disabled by default.
 
 ## Recorded verification
 
@@ -43,6 +45,22 @@ threads, MKLDNN off; orientation/unwarping disabled. No preprocessing added.
   `901016`, `-TICKET CP`, `60.000`. Report contains complete outputs.
   Warning: largest image resized by Paddle to max side 4000; ccache absent
   (nonfatal). No accuracy score is claimed.
+
+## OV3660 batch
+
+Run `.venv/bin/python ov3660_smoke.py` for isolated mocked runner/report checks,
+then `.venv/bin/python ocr_ov3660.py` for actual CPU OCR on the five explicitly
+named crops and five originals (no pairing assumed). The existing engine is
+initialized once. Ignored `results/ov3660-ocr.json` and `results/ov3660-ocr.txt`
+contain verbatim lines, model confidence scores (not accuracy), dimensions,
+timings, errors and runtime/model metadata. Blank outputs are explicit; an
+image failure does not stop later inputs and produces a nonzero exit status.
+No reference labels or accuracy percentage are available for these photos.
+
+Recorded actual run: all 10 inputs completed without exceptions, 108 OCR lines;
+`crops/62.png` returned no lines. Initialization 4.144s, summed per-image
+validation/inference 17.708s, process wall time 22.153s. Both cached official
+models were reused. These counts and model scores do not establish accuracy.
 
 ## Contracts and limits
 

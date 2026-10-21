@@ -19,3 +19,5 @@ SESSION_CONTEXT.md
 *.map
 *.log
 local.jpg
+/datasets/iiit5k/
+/samples/ov3660/
