@@ -1,4 +1,7 @@
-# CORD sample attribution
+# CORD sample attribution — archived
+
+The sample dataset and manifest were removed on 2026-10-22. This attribution
+describes the former snapshot, not assets currently distributed in this repository.
 
 Ten original test receipts and annotations from NAVER CLOVA CORD, Park et al.,
 “CORD: A Consolidated Receipt Dataset for Post-OCR Parsing”.

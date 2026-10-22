@@ -65,7 +65,7 @@ class InferenceRunner:
     def run_smoke(
         self,
         sentence: str = 'What does the man say he will do in July?',
-        image_path: str | Path = 'samples/ov3660/crops/59.png',
+        image_path: str | Path | None = None,
         output_path: str | Path | None = 'results/translation-smoke.json',
     ) -> dict:
         """Run standard verification inference on both a sentence and a sample image."""
@@ -75,18 +75,21 @@ class InferenceRunner:
 
         sent_result = self.infer_sentence(sentence)
 
-        start = time.monotonic()
-        pipe = self.pipeline
-        ocr_init = time.monotonic() - start
-
-        img_p = Path(image_path)
-        img_result = self.infer_image(img_p)
+        ocr_init = None
+        img_p = Path(image_path) if image_path is not None else None
+        img_result = None
+        if img_p is not None:
+            start = time.monotonic()
+            pipe = self.pipeline
+            ocr_init = time.monotonic() - start
+            img_result = self.infer_image(img_p)
 
         report = {
             'sentence': sent_result,
             'translator_init_seconds': trans_init,
             'ocr_init_seconds': ocr_init,
-            'image': str(img_p),
+            'image': str(img_p) if img_p is not None else None,
+            'image_status': 'completed' if img_p is not None else 'skipped: supply --image; bundled camera samples removed',
             'pipeline': img_result,
         }
 
@@ -111,7 +114,7 @@ def main():
     runner = InferenceRunner(recognizer_version=args.recognizer)
 
     if args.smoke or (not args.sentence and not args.image):
-        report = runner.run_smoke(output_path=args.output)
+        report = runner.run_smoke(image_path=args.image, output_path=args.output)
         print(json.dumps(report, ensure_ascii=False, indent=2))
         return
 

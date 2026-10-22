@@ -14,9 +14,6 @@ os.environ.setdefault('PADDLE_PDX_CACHE_HOME', str(DEFAULT_CACHE))
 from ..camera import validate
 from ..ocr import convert, engine
 
-DEFAULT_INPUTS = [f'samples/ov3660/crops/{name}.png' for name in (59, 61, 62, 63, 64)] + [
-    f'samples/ov3660/originals/{name}.png' for name in (1, 2, 3, 4, 5)
-]
 
 
 def run_images(root: Path, paths: list[str], model):
@@ -69,8 +66,8 @@ def run_ov3660(
 ) -> dict:
     if root is None:
         root = Path.cwd()
-    if inputs is None:
-        inputs = DEFAULT_INPUTS
+    if not inputs:
+        raise ValueError('Supply explicit local camera inputs; bundled OV3660 samples were removed')
 
     start = time.monotonic()
     report = {
@@ -123,10 +120,11 @@ def run_ov3660(
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=Path.cwd())
+    parser.add_argument('--inputs', nargs='+', required=True)
     parser.add_argument('--output-json', type=Path, default=Path('results/ov3660-ocr.json'))
     parser.add_argument('--output-txt', type=Path, default=Path('results/ov3660-ocr.txt'))
     args = parser.parse_args()
-    report = run_ov3660(root=args.root, output_json=args.output_json, output_txt=args.output_txt)
+    report = run_ov3660(root=args.root, inputs=args.inputs, output_json=args.output_json, output_txt=args.output_txt)
     raise SystemExit(int(bool(report.get('failures', 0))))
 
 

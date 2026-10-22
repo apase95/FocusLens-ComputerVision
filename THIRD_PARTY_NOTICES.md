@@ -41,7 +41,8 @@ These files carry modification notices. No built firmware or toolchain is distri
 
 ## CORD — CC BY 4.0
 
-The 10 test receipts and annotations in `samples/cord/` are from NAVER CLOVA:
+Historical attribution only: the 10 test receipts and annotations formerly in
+`samples/cord/` were removed on 2026-10-22 and are not distributed now. They came from NAVER CLOVA:
 Park et al., “CORD: A Consolidated Receipt Dataset for Post-OCR Parsing”.
 
 - Source: https://huggingface.co/datasets/naver-clova-ix/cord-v2
@@ -49,9 +50,10 @@ Park et al., “CORD: A Consolidated Receipt Dataset for Post-OCR Parsing”.
 - License: https://creativecommons.org/licenses/by/4.0/
 - Attribution and transformations: [samples/LICENSE-CORD.md](samples/LICENSE-CORD.md)
 
-Images and original annotation strings are unmodified. Derived `.txt` references
-join annotated words in line order. Manifest includes row indices, stable source,
-retrieval time and hashes, but omits expiring signed download URLs.
+The removed snapshot preserved images and original annotation strings. Derived
+`.txt` references joined annotated words in line order; the removed manifest
+recorded source and hashes. Local OV3660 photos were also removed; historical
+reports remain, not their source photos.
 
 ## Paddle software — Apache-2.0
 

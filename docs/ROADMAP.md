@@ -1,7 +1,14 @@
 # Roadmap — các cổng bắt buộc, không phải cam kết lịch
 
-Tất cả cổng nhúng dưới đây **chưa được xác minh trên board**. Không chạy model,
-download hoặc hardware trong đợt retarget tài liệu.
+Tất cả cổng nhúng dưới đây **chưa được xác minh trên board**.
+Thử nghiệm host 2026-10-22 đã export PIR→ONNX, đạt parity FP32 trên 4 TRAIN word,
+build RKNN RV1106 INT8 với workaround và chạy PC simulator. Simulator khớp 4/4
+chuỗi nhưng không đạt tolerance tensor FP32; calibration chỉ 16 TRAIN ảnh riêng.
+**Cổng 2 chưa đạt**: chưa có parity/quality đủ rộng hoặc memory/latency board.
+Xem [bằng chứng và lệnh tái lập](RKNN_CTC_FEASIBILITY.md).
+Expanded trial: [500+500 TRAIN protocol](RKNN_DATASET_EVALUATION.md) selected
+disjoint sets, but 10/500 FP32 comparisons failed the unchanged numerical gate.
+Expanded INT8 remains blocked; no board or quality gate is cleared.
 
 | Cổng | Bằng chứng để đi tiếp |
 |---|---|

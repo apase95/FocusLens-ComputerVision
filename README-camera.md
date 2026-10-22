@@ -6,6 +6,8 @@
 > Luckfox; chưa có kiểm tra phần cứng Luckfox trong dự án.
 
 Chạy các lệnh từ thư mục gốc của repository.
+Ảnh mẫu OV3660 đã xóa; báo cáo cũ chỉ là lịch sử. Benchmark cần ảnh do người dùng
+cung cấp: `python -m focuslens benchmark ov3660 --inputs CAMERA.png`.
 Arduino CLI **1.5.1**: `.camera-tools/bin/arduino-cli`; core Espressif
 **3.3.12**: `.camera-tools/data/packages/esp32/hardware/esp32/3.3.12`.
 Config riêng: `arduino-cli.yaml` (đường dẫn tương đối với thư mục chạy lệnh).

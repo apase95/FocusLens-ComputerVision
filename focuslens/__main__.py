@@ -56,6 +56,7 @@ def main():
     # benchmark ov3660
     ov_p = bm_sub.add_parser('ov3660', help='Benchmark on OV3660 camera samples')
     ov_p.add_argument('--root', type=Path, default=Path.cwd())
+    ov_p.add_argument('--inputs', nargs='+', required=True, help='Explicit local camera image paths; no bundled samples')
     ov_p.add_argument('--output-json', type=Path, default=Path('results/ov3660-ocr.json'))
     ov_p.add_argument('--output-txt', type=Path, default=Path('results/ov3660-ocr.txt'))
 
@@ -74,7 +75,7 @@ def main():
         from .inference import InferenceRunner
         runner = InferenceRunner(recognizer_version=args.recognizer)
         if args.smoke or (not args.sentence and not args.image):
-            report = runner.run_smoke(output_path=args.output)
+            report = runner.run_smoke(image_path=args.image, output_path=args.output)
             print(json.dumps(report, ensure_ascii=False, indent=2))
         else:
             if args.sentence:
@@ -89,7 +90,7 @@ def main():
             run_iiit5k(dataset_path=args.dataset, count=args.count, seed=args.seed, output_path=args.output)
         elif args.benchmark_command == 'ov3660':
             from .benchmarks.ov3660 import run_ov3660
-            report = run_ov3660(root=args.root, output_json=args.output_json, output_txt=args.output_txt)
+            report = run_ov3660(root=args.root, inputs=args.inputs, output_json=args.output_json, output_txt=args.output_txt)
             raise SystemExit(int(bool(report.get('failures', 0))))
         return
 

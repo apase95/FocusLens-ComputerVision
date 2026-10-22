@@ -1,192 +1,119 @@
-# FocusLens — thiết bị đọc từ Anh–Việt offline trên Luckfox
+<div align="center">
 
-Mục tiêu: **Luckfox Pico Max (RV1106G3)** tự chụp → nhận dạng → tra nghĩa
-Anh–Việt + IPA → hiển thị → đọc tiếng Anh, hoàn toàn trên thiết bị; không cần
-PC, điện thoại, cloud hoặc server LAN khi sử dụng. **Đang thiết kế/port, chưa có
-runtime Luckfox hoạt động hoặc số đo phần cứng.** MVP là một từ trong ROI có hướng
-dẫn, không phải dịch cả câu bằng từ điển.
+# 🔎 FocusLens
 
-Mã hiện có là **Python host reference trên PC**: PP-OCRv5_mobile_det +
-en_PP-OCRv5_mobile_rec trên CPU, ghép dòng một cột và OPUS-MT/CTranslate2 INT8.
-Chưa có SQLite dictionary, UI hay TTS nhúng. PC chỉ được phép dùng để chuẩn bị
-asset, export/quantize/calibrate model và flash cho thiết bị mục tiêu; không xử lý
-thay thiết bị khi chạy. Các lệnh bên dưới dành cho host, **không phải hướng dẫn
-cài Python lên Luckfox ARM32**. Không có routing cloud hoặc tải model ngầm.
+### Hướng tới thiết bị nhìn một từ tiếng Anh → tra nghĩa tiếng Việt, không cần mạng
 
-## Tài liệu mục tiêu
+**Căn từ trong khung · Nhận dạng chữ · Tra nghĩa và IPA · Hiển thị và phát âm**
 
-- [Chỉ mục](docs/README.md) · [kiến trúc offline](docs/OFFLINE_ARCHITECTURE.md)
-- [Phần cứng và nguồn chính thức](docs/LUCKFOX_HARDWARE.md)
-- [Roadmap và cổng kiểm chứng](docs/ROADMAP.md) · [quyết định/phạm vi](docs/SESSION_DECISIONS.md)
-- [OCR host](README-ocr.md) · [camera ESP32 lịch sử](README-camera.md)
+Hiện có bản tham chiếu Python chạy trên PC và kết quả thử chuyển mô hình sang RKNN.
+**Chưa có runtime hoạt động trên Luckfox hoặc số đo phần cứng.**
 
-## Cài đặt và chuẩn bị model
+</div>
 
-Chạy từ thư mục gốc repository; dùng Python 3.12 trong môi trường riêng:
+---
 
-```sh
-uv venv --python python3.12 .venv
-uv pip install --python .venv/bin/python -r requirements-ocr.lock.txt
-uv pip install --python .venv/bin/python -r requirements-translation.txt
+## 💡 Bài toán: tra một từ mà không phụ thuộc điện thoại hay PC
+
+Khi đọc sách tiếng Anh, người học thường phải rời trang giấy để mở điện thoại,
+chụp ảnh hoặc gõ từ vào ứng dụng tra cứu. Công cụ cần mạng hay máy tính đi kèm
+lại không phù hợp với một thiết bị học tập nhỏ, độc lập.
+
+FocusLens hướng tới thao tác đơn giản: **đưa một từ vào khung, nhấn chụp, thấy
+nghĩa tiếng Việt và phiên âm IPA, rồi nghe cách đọc tiếng Anh**. Đây là tra từ,
+không phải lấy từ điển ghép thành bản dịch cả câu.
+
+Phần cứng mục tiêu là **Luckfox Pico Max — RV1106G3, RAM tổng 256 MB**.
+Thách thức không chỉ là đọc đúng chữ: mô hình, ảnh camera, màn hình và âm thanh
+đều phải dùng chung bộ nhớ nhỏ này. Chưa có cam kết về tốc độ hay RAM thực tế.
+
+## 🏗️ Kiến trúc mục tiêu — chưa triển khai trên board
+
+```mermaid
+flowchart TD
+    Camera["Camera chụp ảnh"] --> Crop["Cắt một từ trong khung hướng dẫn"]
+    Crop --> OCR["Mô hình RKNN ứng viên trên NPU: nhận dạng ký tự"]
+    OCR --> CTC["CTC trên CPU: ghép ký tự thành từ tiếng Anh"]
+    CTC --> Dict["Từ điển offline: nghĩa tiếng Việt và IPA"]
+    Dict --> Display["Màn hình: từ, nghĩa và phiên âm"]
+    Dict --> Audio["Âm thanh: cách đọc tiếng Anh"]
 ```
 
-`requirements-ocr.txt` ghim dependency trực tiếp; lock OCR ghi phiên bản, không
-phải hash artifact. Cài dependency và chuẩn bị model có thể cần Internet;
-**inference chỉ dùng tài nguyên đã có ở máy, không ngầm tải model**.
+**NPU** là bộ xử lý hỗ trợ chạy mô hình; **CTC** biến chuỗi dự đoán ký tự thành
+văn bản, bỏ các vị trí trống và ký tự lặp do mô hình tạo ra.
 
-### OCR: cung cấp asset thủ công trước khi chạy
+Trong thiết kế này, PC chỉ chuẩn bị tài nguyên, chuyển đổi mô hình và nạp thiết bị;
+**khi sử dụng không cần PC, điện thoại, cloud hay server LAN**.
+Từ điển, giao diện và âm thanh nhúng chưa được triển khai; tài nguyên có quyền
+phân phối chưa được chọn, camera cụ thể cũng chưa chốt.
+Chi tiết nằm trong [kiến trúc offline](docs/OFFLINE_ARCHITECTURE.md).
 
-Lấy model chính thức từ PaddleOCR/PaddlePaddle, kiểm tra giấy phép và hash nguồn.
-Mỗi thư mục sau cần đủ `inference.json`, `inference.yml`, `inference.pdiparams`:
+---
 
-```text
-.cache/paddlex/official_models/PP-OCRv5_mobile_det/
-.cache/paddlex/official_models/en_PP-OCRv5_mobile_rec/
-.cache/paddlex/official_models/en_PP-OCRv4_mobile_rec/  # nếu cần rollback
-```
+## 📊 Đã có gì: bản tham chiếu và số liệu trên PC
 
-Không đổi tên weights v4 thành v5. Preflight từ chối thiếu file thay vì tải ngầm.
-Chuẩn bị recognizer v5 bằng lệnh tải mạng tường minh:
-```sh
-.venv/bin/python -m scripts.prepare_ocr
-```
-Script kiểm tra model card Apache-2.0 qua API PaddlePaddle/Hugging Face, ghim
-revision bất biến, giới hạn tải/thời gian, ghi SHA256 và không ghi đè cache.
-Ngày 2026-10-22 đã tải weights chính thức và chạy inference thực thành công;
-xem [baseline v5 mới](focuslens/benchmarks/RECOGNIZER_V5_BASELINE.md).
+Bản Python hiện có chạy OCR bằng **PP-OCRv5_mobile_det + en_PP-OCRv5_mobile_rec**
+trên CPU. Nhánh dịch câu dùng OPUS-MT/CTranslate2 INT8 vẫn được giữ làm tham chiếu
+trên PC, **tách biệt với mục tiêu tra một từ**. Nhánh dịch từng ghi nhận RAM đỉnh
+**332,1 MiB**, vượt tổng RAM 256 MB của board; kích thước model không phải RAM chạy.
 
-### Dịch: chuẩn bị riêng, có tải mạng tường minh
+### Nhận dạng trên ảnh từ/dòng đã cắt: v4 → v5
 
-Runtime cần model đã chuyển đổi tại `models/opus-en-vi/ct2` và tokenizer trong
-`models/opus-en-vi`. Script chuẩn bị dùng thêm PyTorch và Transformers (không nằm
-trong dependency dịch runtime ở trên):
+| Tập ảnh | v4 đúng hoàn toàn | v5 đúng hoàn toàn | CER v4 → v5 |
+|:---|---:|---:|---:|
+| HierText DEV — 200 ảnh | 135/200 | **175/200** | 1,6993% → **0,5152%** |
+| IIIT5K TEST — 3.000 ảnh | 2515/3000 | **2541/3000** | 4,1195% → **3,9099%** |
+| HierText TEST — 500 ảnh | 274/500 | **424/500** | 2,8283% → **1,3555%** |
 
-```sh
-uv pip install --python .venv/bin/python torch transformers
-.venv/bin/python scripts/prepare_translation.py
-```
+**CER** là tỷ lệ lỗi ký tự, càng thấp càng tốt. Bảng này không phân biệt hoa/thường
+(casefold), gộp khoảng trắng và giữ dấu câu. v5 tốt hơn tổng thể nhưng vẫn có ảnh
+đọc kém hơn v4; không phải cải thiện trên mọi ảnh.
 
-Đây là bước **chủ động tải**, không phải inference offline: script lấy
-`Helsinki-NLP/opus-mt-en-vi` tại revision
-`989c9fb9ec63987901022baf0182dcec3e149be6`, chuyển sang INT8 và ghi provenance/hash.
-Cần ít nhất 3 GB trống; tổng tải bị giới hạn 700 MB. Script không ghi đè thư mục
-không rỗng; nếu lỗi, giữ thư mục dở dang để người dùng tự di chuyển trước khi thử
-lại. Dependency chuyển đổi ở lệnh trên chưa được ghim thành môi trường tái lập.
-Máy offline cần được chuyển sẵn toàn bộ asset đã chuẩn bị; không chạy script tải.
+Các tập trên đã được xem trước đây, **không phải đánh giá độc lập trên dữ liệu
+chưa từng thấy**. Đây chỉ là nhận dạng ảnh đã cắt, không chứng minh khả năng đọc
+từ camera, phát hiện chữ trên trang, dịch hay chạy trên Luckfox.
+Nguồn: [baseline recognizer v5](focuslens/benchmarks/RECOGNIZER_V5_BASELINE.md).
 
-## Sử dụng
+### Chuyển sang INT8: tạo được mô hình, nhưng chất lượng giảm
 
-```sh
-.venv/bin/python -m focuslens --help
-.venv/bin/python -m focuslens ocr IMAGE.png
-.venv/bin/python -m focuslens translate IMAGE.png
-.venv/bin/python -m focuslens inference --image IMAGE.png
+INT8 dùng số có độ chính xác thấp hơn để giảm dung lượng và hướng tới tiết kiệm
+tài nguyên. Đổi lại, mô hình có thể đọc sai nhiều hơn. Thử nghiệm dưới đây dùng
+**500 ảnh TRAIN để hiệu chỉnh và 500 ảnh TRAIN khác để so sánh**, không trùng ảnh
+hay nhóm tiền tố tên tệp giữa hai phần; mẫu được chọn phân tầng.
 
-# Rollback tường minh về recognizer v4; detector vẫn là v5
-.venv/bin/python -m focuslens ocr --recognizer v4 IMAGE.png
-.venv/bin/python -m focuslens ocr --recognizer v4 --mode word WORD.png
-.venv/bin/python -m focuslens translate --recognizer v4 IMAGE.png
-.venv/bin/python -m focuslens inference --recognizer v4 --image IMAGE.png
-```
+| Cách chạy | Đúng / 500, phân biệt hoa/thường | CER, phân biệt hoa/thường | Đúng / 500, casefold | CER, casefold |
+|:---|---:|---:|---:|---:|
+| Paddle, chiều rộng linh hoạt | 263 | 41,4910% | 418 | 3,9533% |
+| ONNX, chiều rộng cố định | 264 | 41,5286% | 419 | 3,9533% |
+| RKNN INT8, giả lập trên PC | 231 | 44,6913% | 353 | 9,0738% |
 
-API tương ứng: `OCRRuntime(recognizer_version='v4')` hoặc
-`engine(recognizer_version='v4')`. Chế độ word dành cho crop từ/dòng đã tách,
-không thay thế đánh giá detector trên ảnh nguyên trang.
-Xem [OCR và giới hạn ảnh](README-ocr.md), [camera ESP32-CAM lịch sử](README-camera.md).
-Capture HTTP là đường thử nghiệm host cũ, không thuộc kiến trúc standalone mới.
-Chỉ dùng trên LAN tin cậy; firmware mẫu không có xác thực/TLS.
+Phân biệt hoa/thường là cách chấm chính; casefold chỉ là cách nhìn bổ sung.
+Nhãn mẫu chủ yếu viết hoa, không có mẫu chứa dấu câu. TRAIN cũng đã được xem
+trước đây: **đây là khảo sát có giới hạn, không phải độ chính xác tổng quát**.
 
-## Bằng chứng thực nghiệm và giới hạn
+- Chiều rộng cố định không phải nguồn mất chất lượng chính trên mẫu ảnh từ này;
+  chưa có kết luận tương tự cho dòng dài.
+- So sánh số thực FP32 Paddle–ONNX chỉ đạt ngưỡng nghiêm ngặt ở **490/500 ảnh**,
+  dù cả 500 ảnh cho cùng văn bản. Trạng thái nghiêm ngặt vẫn là **FAIL**.
+  INT8 được chạy tiếp theo chính sách chẩn đoán riêng, không phải đã đạt nghiệm thu.
+- Đã build được RKNN INT8; tệp của thử nghiệm khả thi ban đầu khoảng **3,12 MB**.
+  Điều này không chứng minh RAM sử dụng, tốc độ NPU hay khả năng chạy trên board.
 
-Tất cả số liệu dưới đây là **PC/CPU**, không phải RV1106/NPU. Benchmark gốc
-được giữ nguyên; chưa xác minh chuyển recognizer v5 sang RKNN. Phân tích lỗi:
-[paired v5 cases](focuslens/benchmarks/RECOGNIZER_V5_ERROR_ANALYSIS.md).
+Nguồn: [đánh giá 500 + 500 ảnh](docs/RKNN_DATASET_EVALUATION.md) và
+[thử nghiệm RKNN + CTC ban đầu](docs/RKNN_CTC_FEASIBILITY.md).
 
-### So sánh DEV lịch sử: recognizer v4 → v5
+---
 
-Trên **200 crop dòng in HierText DEV**, chỉ nhận dạng, không detector:
+## 📌 Kết luận và giới hạn
 
-| Recognizer | Exact | CER | WER |
-|---|---:|---:|---:|
-| v4 | 135/200 (67,5%) | 1,6993% | 11,1842% |
-| v5 | 175/200 (87,5%) | 0,5152% | 3,4539% |
+FocusLens hiện chứng minh được **baseline nhận dạng trên PC** và khả năng tạo
+mô hình RKNN thử nghiệm. Kết quả INT8 cho thấy tổn thất chất lượng rõ rệt;
+chưa thể coi là bản tối ưu hoàn tất hay sản phẩm nhúng hoạt động.
+Thiết bị tra từ độc lập vẫn là **thiết kế mục tiêu**, chưa được xác minh về
+camera, màn hình, âm thanh, bộ nhớ hoặc độ trễ trên phần cứng thật.
 
-Có **45 cải thiện, 5 hồi quy**. Chuẩn hóa casefold và khoảng trắng, giữ dấu câu.
-Đây là dự đoán lịch sử đã audit với DEV đóng băng, không phải inference vừa chạy,
-không phải kiểm chứng held-out độc lập hay kết quả camera/full pipeline/dịch.
-Artifact lịch sử không đủ chứng minh hash weights, môi trường và protocol timing;
-không dùng timing cũ để cam kết tốc độ. Xem [báo cáo audit và hồi quy](focuslens/benchmarks/HIERTEXT_DEV_RECOGNIZER_COMPARISON.md).
+## 📄 Giấy phép và ghi nhận
 
-```sh
-# Offline: cần artifact lịch sử và dữ liệu DEV cục bộ
-.venv/bin/python -m focuslens.benchmarks.recognizer_comparison audit
-# Chỉ sau khi có đủ asset v4/v5 và DEV; output phải chưa tồn tại
-.venv/bin/python -m focuslens.benchmarks.recognizer_comparison run --output results/recognizer-v5-dev-new
-```
-
-Runner mới ghi hash model/input/source, phiên bản runtime, lỗi từng dòng và
-protocol timing. Đo mới ngày 2026-10-22: v5 exact **175/200 DEV**, **2541/3000
-IIIT5K TEST**, **424/500 HierText TEST**, không exception. So với v4 có lần lượt
-5, 67, 10 hồi quy; không phải cải thiện mọi ảnh. Xem protocol, CER/WER và latency
-trong [baseline v5](focuslens/benchmarks/RECOGNIZER_V5_BASELINE.md).
-Held-out độc lập vẫn thiếu; TEST đã xem không được gọi là dữ liệu chưa từng thấy.
-
-### Baseline v4 đóng băng và dịch
-
-- [Word baseline v1](focuslens/benchmarks/WORD_BASELINE.md): **2515/3000 exact**
-  trên IIIT5K TEST, recognizer **v4**. Không đổi nhãn thành kết quả v5.
-- [Full TEST và resize study](focuslens/benchmarks/IIIT5K_FULLTEST.md),
-  [OCR tuning](focuslens/benchmarks/OCR_TUNING.md),
-  [đánh giá và giới hạn](focuslens/benchmarks/EVALUATION.md) giữ phạm vi riêng.
-- [HierText lines](focuslens/benchmarks/HIERTEXT_LINES.md): 200 DEV + 500 TEST,
-  review bằng model, không phải audit con người hay bảo đảm câu tiếng Anh đầy đủ.
-- Translation peak RSS đã ghi nhận **332,1 MiB**; kích thước model INT8 không
-  phải RAM tiến trình. Không cam kết RAM dưới 100 MB hoặc latency 50–150 ms.
-  Chất lượng dịch và khả năng chịu lỗi OCR vẫn cần review phù hợp.
-
-## Kiểm tra
-
-```sh
-# Xác minh bằng chứng word v4 có sẵn, không đo baseline mới
-.venv/bin/python -m focuslens.benchmarks.word_baseline
-# Kiểm tra cô lập bằng mock; không cần camera thật
-.venv/bin/python -m unittest tests/test_ov3660.py
-python3 -m unittest tests/test_camera.py
-```
-
-Các verifier cần dữ liệu/artifact cục bộ tương ứng. Hướng dẫn compile smoke và
-điều kiện bảo vệ header Wi-Fi nằm trong [README-camera.md](README-camera.md).
-Test mock không chứng minh chất lượng OCR, dịch hay phần cứng hoạt động.
-
-## Kiến trúc host reference hiện có (không phải runtime nhúng)
-
-```text
-Ảnh file / capture HTTP trên LAN → kiểm tra/tiền xử lý ảnh
-  → detector v5 + recognizer v5 (hoặc rollback v4)
-  → ghép dòng một cột → OPUS-MT/CTranslate2 INT8 → kết quả và timings
-```
-
-- [contracts.py](focuslens/contracts.py): `Frame`, `TextLine`.
-- [imaging.py](focuslens/imaging.py): decode, giới hạn ảnh, tiền xử lý tùy chọn.
-- [ocr.py](focuslens/ocr.py): runtime OCR và model local.
-- [assembly.py](focuslens/assembly.py): sắp xếp/ghép dòng; không phải layout đa cột.
-- [translation.py](focuslens/translation.py): dịch cục bộ.
-- [pipeline.py](focuslens/pipeline.py), [inference.py](focuslens/inference.py): điều phối và timing.
-- [benchmarks](focuslens/benchmarks/), [scripts](scripts/), [tests](tests/): đánh giá, chuẩn bị và kiểm thử.
-
-## Roadmap — chưa phải khả năng hiện tại
-
-1. Xác minh BSP/camera/display/audio/nguồn trên Pico Max; boot không mạng.
-2. Kiểm chứng recognizer RKNN + CTC, parity INT8 và ngân sách RAM trên board.
-3. Tích hợp từ điển EN–VI/IPA có quyền phân phối, UI và audio/TTS offline.
-4. Đo camera → âm thanh, RSS/PSS, p50/p95, nguồn và độ bền; đánh giá độc lập.
-5. Dịch câu là nhánh feasibility riêng: host OPUS/CTranslate2 peak RSS **332,1 MiB**
-   vượt toàn bộ **256 MB RAM** của board; chưa có cam kết chạy ARM32 hay giải pháp thay thế.
-
-Xem [roadmap có điều kiện nghiệm thu](docs/ROADMAP.md). Không đặt backend online
-hoặc server LAN làm điều kiện cho sản phẩm standalone.
-
-## Giấy phép
-
-Mã tự phát triển dùng [MIT](LICENSE). Model, dữ liệu và firmware tham chiếu giữ
-giấy phép riêng; xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Mã tự phát triển dùng giấy phép [MIT](LICENSE). Model, dữ liệu và firmware tham
+chiếu giữ giấy phép riêng; các ghi nhận lịch sử được giữ trong
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

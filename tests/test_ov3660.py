@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from PIL import Image
 
-from focuslens.benchmarks.ov3660 import render, run_images
+from focuslens.benchmarks.ov3660 import render, run_images, run_ov3660
 
 
 class FakeEngine:
@@ -17,6 +17,10 @@ class FakeEngine:
 
 
 class TestOV3660Benchmark(unittest.TestCase):
+    def test_no_implicit_samples(self):
+        with self.assertRaisesRegex(ValueError, 'explicit local'):
+            run_ov3660(output_json=None, output_txt=None)
+
     def test_happy_report(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -18,15 +18,15 @@ The v5 recognizer was missing at migration time, but was officially provisioned
 and forward-tested on 2026-10-22. Use `.venv/bin/python -m scripts.prepare_ocr`
 on a new machine; it refuses overwrite and records immutable revision/hashes.
 See [fresh recognition baseline](focuslens/benchmarks/RECOGNIZER_V5_BASELINE.md).
-Sample retrieval below is an explicit network operation, not offline setup.
+CORD and OV3660 samples were removed on 2026-10-22. Retrieval utilities remain
+optional historical tools, never automatic setup. Historical measurements below
+refer to removed assets; they cannot be replayed without separately supplied data.
 
 ```sh
 uv venv --python python3.12 .venv
 uv pip install --python .venv/bin/python -r requirements-ocr.lock.txt
 .venv/bin/python -m unittest discover tests
-.venv/bin/python scripts/retrieve_samples.py
-.venv/bin/python scripts/ocr_samples.py
-.venv/bin/python -m focuslens ocr samples/cord/test-000.png
+.venv/bin/python -m focuslens ocr IMAGE.png
 # Optional only when explicitly testing your camera on a trusted LAN:
 # .venv/bin/python -m focuslens capture http://CAMERA_IP/capture local.jpg
 ```
@@ -64,8 +64,8 @@ the new pipeline offers optional mild preprocessing, disabled by default.
 ## OV3660 batch
 
 Run `.venv/bin/python -m unittest tests/test_ov3660.py` for isolated mocked runner/report checks,
-then `.venv/bin/python -m focuslens benchmark ov3660` for actual CPU OCR on the five explicitly
-named crops and five originals (no pairing assumed). The existing engine is
+then `.venv/bin/python -m focuslens benchmark ov3660 --inputs CAMERA.png` for actual CPU OCR
+on explicitly supplied images (no bundled samples or pairing assumed). The existing engine is
 initialized once. Ignored `results/ov3660-ocr.json` and `results/ov3660-ocr.txt`
 contain verbatim lines, model confidence scores (not accuracy), dimensions,
 timings, errors and runtime/model metadata. Blank outputs are explicit; an
@@ -86,7 +86,8 @@ socket timeout by default. This is not a total wall-clock deadline (slow trickle
 responses may take longer); redirects follow urllib defaults. Only use trusted
 URLs. Camera defaults to QVGA in firmware, not validated for OCR quality.
 
-See samples/LICENSE-CORD.md and samples/cord/manifest.json for attribution,
+See archived samples/LICENSE-CORD.md for attribution of the removed snapshot.
+The historical manifest (also removed) recorded
 CC BY 4.0, source URLs and SHA256. First ten test rows are deterministic, but the
 rows endpoint is not revision pinned; stored hashes identify this snapshot.
 Reruns verify existing files offline; refuse partial/nonempty directory rather
