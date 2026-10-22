@@ -1,0 +1,13 @@
+{
+  "provenance": "Original diagnostic sentences authored for this evaluation; references not human audited. Not a representative accuracy corpus.",
+  "items": [
+    {"id":"negation", "en":"Do not open the red door.", "vi":"Đừng mở cánh cửa màu đỏ.", "units":{"negation":["không","đừng"],"action":["mở"],"object":["cửa"],"color":["đỏ"]}},
+    {"id":"number", "en":"The train leaves at 7, not at 8.", "vi":"Tàu khởi hành lúc 7, không phải lúc 8.", "units":{"vehicle":["tàu"],"time":["7"],"excluded_time":["8"],"negation":["không"]}},
+    {"id":"roles", "en":"The teacher gave the student a book.", "vi":"Giáo viên đưa cho học sinh một cuốn sách.", "units":{"giver":["giáo viên","thầy","cô giáo"],"recipient":["học sinh","sinh viên"],"object":["sách"]}},
+    {"id":"question", "en":"What will he do tomorrow?", "vi":"Anh ấy sẽ làm gì vào ngày mai?", "units":{"subject":["anh ấy","ông ấy","cậu ấy"],"future":["sẽ"],"action_question":["làm gì"],"time":["mai"]}},
+    {"id":"quantity", "en":"Buy two apples and three oranges.", "vi":"Mua hai quả táo và ba quả cam.", "units":{"two":["hai","2"],"three":["ba","3"],"apple":["táo"],"orange":["cam"]}},
+    {"id":"condition", "en":"If it rains, we will stay home.", "vi":"Nếu trời mưa, chúng tôi sẽ ở nhà.", "units":{"condition":["nếu"],"weather":["mưa"],"place":["nhà"]}},
+    {"id":"comparison", "en":"This box is heavier than that bag.", "vi":"Chiếc hộp này nặng hơn chiếc túi kia.", "units":{"box":["hộp"],"comparison":["nặng hơn"],"bag":["túi","bao"]}},
+    {"id":"warning", "en":"Keep the medicine away from children.", "vi":"Để thuốc xa tầm tay trẻ em.", "units":{"medicine":["thuốc"],"separation":["xa","tránh"],"children":["trẻ","con nít"]}}
+  ]
+}

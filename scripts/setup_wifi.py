@@ -3,6 +3,8 @@ import getpass
 import os
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
 
 def c_string(value):
     # Fixed-width octal escapes prevent quote injection, trigraphs and hex bleed.
@@ -26,7 +28,7 @@ if __name__ == '__main__':
     ssid = getpass.getpass('SSID (hidden): ')
     password = getpass.getpass('Wi-Fi password (hidden; empty for open network): ')
     try:
-        write_header(Path(__file__).parent / 'CameraWebServer/wifi_secrets.h', ssid, password)
+        write_header(PROJECT_ROOT / 'CameraWebServer/wifi_secrets.h', ssid, password)
     except (ValueError, FileExistsError):
         raise SystemExit('Invalid input or header already exists; remove it locally to reconfigure.')
     print('Private header created. No credentials printed.')

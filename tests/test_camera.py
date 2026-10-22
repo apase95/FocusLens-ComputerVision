@@ -1,12 +1,13 @@
-"""Isolated stdlib tests: python3 camera_smoke.py (no suite discovery)."""
+"""Isolated stdlib tests for camera wifi configuration."""
 import stat
 import tempfile
 import unittest
 from pathlib import Path
-import setup_wifi
+
+from scripts import setup_wifi
 
 
-class WifiSmoke(unittest.TestCase):
+class TestWifiSetup(unittest.TestCase):
     def test_private_header(self):
         with tempfile.TemporaryDirectory() as d:
             p = Path(d) / 'wifi_secrets.h'

@@ -28,7 +28,7 @@ ESP32 cần Wi-Fi **2.4 GHz**. Không gửi mật khẩu vào chat hoặc dòng 
 Chạy ở thư mục dự án:
 
 ```sh
-python3 setup_wifi.py
+python3 scripts/setup_wifi.py
 ```
 
 Cả SSID và mật khẩu nhập ẩn qua getpass. Script tạo
@@ -81,11 +81,11 @@ Core index chính thức nằm trong YAML; CLI kiểm tra checksum gói khi cài
 ```sh
 .camera-tools/bin/arduino-cli --config-file arduino-cli.yaml core update-index
 .camera-tools/bin/arduino-cli --config-file arduino-cli.yaml core install esp32:esp32@3.3.12
-python3 camera_smoke.py
-python3 compile_smoke.py
+python3 -m unittest tests/test_camera.py
+python3 -m unittest tests/test_compile.py
 ```
 
-Smoke stdlib chỉ chạy file này, không discovery suite. Hai test kiểm tra header
+Các lệnh unittest stdlib chỉ chạy hai file được chỉ định, không discovery suite. Hai test camera kiểm tra header
 0600, escaping và từ chối ghi đè; RED thiếu module, sau đó GREEN 2 test/0.002s
 (wall 0.052s). Compile smoke thật 17.72s, tự xóa header test trong finally;
 từ chối nếu đã có header thật. Không chạy suite/integration hoặc hardware test.

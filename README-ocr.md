@@ -6,24 +6,31 @@ System Python 3.14.7 is unchanged. Installed runtime is isolated CPython 3.12.14
 Official API reference: https://www.paddleocr.ai/main/en/quick_start.html
 Paddle 3.2.2 cp312 CPU wheel installed successfully from the package index.
 
+**Before running OCR:** provision the local detector and recognizer assets as
+described in [README model prerequisites](README.md#ocr-cung-cấp-asset-thủ-công-trước-khi-chạy).
+The v5 recognizer was missing at migration time; inference will fail explicitly
+until it is supplied (or use the documented v4 rollback with local v4 assets).
+Sample retrieval below is an explicit network operation, not offline setup.
+
 ```sh
 uv venv --python python3.12 .venv
 uv pip install --python .venv/bin/python -r requirements-ocr.lock.txt
-python3 camera_smoke.py
-.venv/bin/python focuslens_smoke.py
-.venv/bin/python retrieve_samples.py
-.venv/bin/python ocr_samples.py
+.venv/bin/python -m unittest discover tests
+.venv/bin/python scripts/retrieve_samples.py
+.venv/bin/python scripts/ocr_samples.py
 .venv/bin/python -m focuslens ocr samples/cord/test-000.png
 # Optional only when explicitly testing your camera on a trusted LAN:
 # .venv/bin/python -m focuslens capture http://CAMERA_IP/capture local.jpg
 ```
 
 `requirements-ocr.txt` pins direct dependencies; lock file records all 62 installed
-versions (not artifact hashes). Models download on first OCR use. Batch runner
+versions (not artifact hashes). Current runtime refuses implicit model downloads;
+see README.md for v5 asset setup and explicit `--recognizer v4` rollback. Batch runner
 keeps caches in ignored `.cache/`, saves text/confidence/polygons and timings in
 ignored `results/ocr-samples.json`. Standalone CLI uses library default cache;
 set PADDLE_PDX_CACHE_HOME to the project's .cache/paddlex to reuse batch models.
-Models are official PP-OCRv5_mobile_det and en_PP-OCRv4_mobile_rec; CPU, two
+Historical measurements below used PP-OCRv5_mobile_det and en_PP-OCRv4_mobile_rec;
+current default recognition is en_PP-OCRv5_mobile_rec. CPU, two
 threads, MKLDNN off; orientation/unwarping disabled. Legacy OCR stays unchanged;
 the new pipeline offers optional mild preprocessing, disabled by default.
 
@@ -48,8 +55,8 @@ the new pipeline offers optional mild preprocessing, disabled by default.
 
 ## OV3660 batch
 
-Run `.venv/bin/python ov3660_smoke.py` for isolated mocked runner/report checks,
-then `.venv/bin/python ocr_ov3660.py` for actual CPU OCR on the five explicitly
+Run `.venv/bin/python -m unittest tests/test_ov3660.py` for isolated mocked runner/report checks,
+then `.venv/bin/python -m focuslens benchmark ov3660` for actual CPU OCR on the five explicitly
 named crops and five originals (no pairing assumed). The existing engine is
 initialized once. Ignored `results/ov3660-ocr.json` and `results/ov3660-ocr.txt`
 contain verbatim lines, model confidence scores (not accuracy), dimensions,

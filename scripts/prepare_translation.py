@@ -6,17 +6,26 @@ import sys
 import urllib.request
 from pathlib import Path
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
 MODEL = 'Helsinki-NLP/opus-mt-en-vi'
 REVISION = '989c9fb9ec63987901022baf0182dcec3e149be6'
-ROOT = Path('models/opus-en-vi')
-FILES = ('config.json', 'generation_config.json', 'pytorch_model.bin', 'source.spm',
-         'target.spm', 'tokenizer_config.json', 'vocab.json', 'README.md')
+ROOT = PROJECT_ROOT / 'models/opus-en-vi'
+FILES = (
+    'config.json',
+    'generation_config.json',
+    'pytorch_model.bin',
+    'source.spm',
+    'target.spm',
+    'tokenizer_config.json',
+    'vocab.json',
+    'README.md',
+)
 
 
 def main():
     if ROOT.exists() and any(ROOT.iterdir()):
         raise SystemExit('Model directory is nonempty; refusing to overwrite. Move it aside to retry.')
-    if shutil.disk_usage('.').free < 3_000_000_000:
+    if shutil.disk_usage(PROJECT_ROOT).free < 3_000_000_000:
         raise SystemExit('Need at least 3 GB free for download/conversion')
     ROOT.mkdir(parents=True, exist_ok=True)
     records = []
@@ -36,8 +45,12 @@ def main():
         print(f'{name}: {size} bytes', flush=True)
     from ctranslate2.converters import TransformersConverter
     TransformersConverter(str(ROOT)).convert(str(ROOT / 'ct2'), quantization='int8')
-    (ROOT / 'provenance.json').write_text(json.dumps(dict(model=MODEL, revision=REVISION,
-        files=records, runtime='ctranslate2==4.6.0', quantization='int8'), indent=2))
+    (ROOT / 'provenance.json').write_text(
+        json.dumps(
+            dict(model=MODEL, revision=REVISION, files=records, runtime='ctranslate2==4.6.0', quantization='int8'),
+            indent=2,
+        )
+    )
     print(f'Prepared INT8 translation model; downloaded {total} bytes')
 
 

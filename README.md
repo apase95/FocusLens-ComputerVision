@@ -1,137 +1,160 @@
-# FocusLens · OCR → dịch câu Anh–Việt
+# FocusLens — OCR và dịch Anh–Việt cục bộ
 
-Pipeline mô-đun chạy trên máy Linux/CPU, không dùng API AI trả phí.
-ESP32-S3/CAM với OV3660/OV5640 **chỉ chụp ảnh**; Paddle/Marian không chạy trên MCU.
-Không cam kết nhanh nhất, khôi phục chữ đã mất do mờ, hoặc dịch luôn đúng.
+FocusLens nhận ảnh từ file hoặc camera, đọc chữ tiếng Anh trên CPU và dịch sang
+tiếng Việt. Runtime hiện tại dùng **PP-OCRv5_mobile_det + en_PP-OCRv5_mobile_rec**,
+ghép dòng một cột và dịch bằng **OPUS-MT qua CTranslate2 INT8**. Không có routing
+cloud, dịch qua API hay tự động chọn model theo kết nối mạng.
 
-## Kiến trúc
+## Cài đặt và chuẩn bị model
 
-`camera.py` capture/validation → `imaging.py` decode/tiền xử lý tùy chọn →
-`ocr.py` Paddle adapter → `assembly.py` sắp hàng/ghép dòng → `translation.py`
-OPUS EN→VI → `pipeline.py` điều phối, giữ nguyên text/box và thời gian từng bước.
-CLI cũ `capture`, `ocr`, `Frame`, `TextLine`, `engine()`, `convert()` giữ tương thích.
-
-- OCR: PP-OCRv5_mobile_det + en_PP-OCRv4_mobile_rec, CPU 2 threads, MKLDNN tắt.
-- Dịch: Helsinki-NLP/opus-mt-en-vi, CTranslate2 CPU INT8, 2 threads, beam 4;
-  Moses punctuation normalization + SentencePiece, tiền tố bắt buộc `>>vie<<`.
-  Ghép dòng xuống hàng bằng dấu cách trước khi tách câu, không dịch từng OCR box.
-- Mặc định không tăng cường ảnh. `--enhance`: giới hạn cạnh 2000, autocontrast
-  cutoff 0, unsharp radius 1/50%/threshold 3; không denoise hay sửa chính tả.
-  Box thuộc hệ tọa độ ảnh đã xử lý, transformation được ghi rõ.
-- Chỉ thứ tự một cột; bảng/nhiều cột, đoạn văn, chữ nghiêng cần layout tốt hơn.
-  OCR sai có thể tạo bản dịch vô nghĩa dù confidence cao; confidence không phải accuracy.
-- JPEG/PNG tối đa 8 MB và 20 triệu pixel. Câu quá 500 model tokens bị từ chối,
-  không âm thầm cắt đầu vào. Chưa có server: bước kế tiếp là endpoint localhost
-  có giới hạn request và khóa inference; không quảng cáo API chưa triển khai.
-
-## Cài đặt / chuẩn bị model (chủ động tải mạng)
-
-Đã kiểm tra Linux, Python 3.12.14. Python hệ thống không bị thay đổi.
+Chạy từ thư mục gốc repository; dùng Python 3.12 trong môi trường riêng:
 
 ```sh
 uv venv --python python3.12 .venv
 uv pip install --python .venv/bin/python -r requirements-ocr.lock.txt
-uv pip install --python .venv/bin/python torch==2.6.0 --index-url https://download.pytorch.org/whl/cpu
-uv pip install --python .venv/bin/python -r requirements-translation-prepare.txt
-.venv/bin/python prepare_translation.py
+uv pip install --python .venv/bin/python -r requirements-translation.txt
 ```
 
-Requirements dịch/preparation ghim trực tiếp, không phải lock đa nền tảng có hash.
-Preparation dùng Transformers 4.51.3 và Hub 0.36.2 (thay Hub 2.2.0 trong lock OCR);
-OCR regression và inference đã kiểm tra trong môi trường kết hợp này.
-Sau conversion, dịch chỉ cần `requirements-translation.txt`, không cần torch/Transformers.
-Imports không tự tải weights dịch; model thiếu báo lệnh chuẩn bị. OCR lần đầu vẫn
-có thể tải model chính thức. Đặt cache dùng chung như ví dụ dưới.
+`requirements-ocr.txt` ghim dependency trực tiếp; lock OCR ghi phiên bản, không
+phải hash artifact. Cài dependency và chuẩn bị model có thể cần Internet;
+**inference chỉ dùng tài nguyên đã có ở máy, không ngầm tải model**.
 
-Model gốc OPUS zip từ model card trả HTTP 404 trong lần kiểm tra; script dùng
-checkpoint HF chính chủ, revision `989c9fb9ec63987901022baf0182dcec3e149be6`.
-Tải 291,627,698 bytes, conversion INT8 thành công, 27.614s wall; `ct2/model.bin`
-73,683,315 bytes. Dependency downloads gồm CT2 37 MiB, SentencePiece 1.3 MiB,
-CPU torch 170.3 MiB, Transformers 9.9 MiB và các dependency nhỏ. Script cần 3 GB
-trống, giới hạn tổng tải 700 MB, từ chối ghi đè thư mục không rỗng, ghi provenance
-và SHA256 trong `models/opus-en-vi/`. Nếu thất bại, tự di chuyển thư mục dở trước
-khi chạy lại. Weights/cache/results/dataset/ảnh cá nhân không commit.
+### OCR: cung cấp asset thủ công trước khi chạy
 
-## Chạy
+Lấy model chính thức từ PaddleOCR/PaddlePaddle, kiểm tra giấy phép và hash nguồn.
+Mỗi thư mục sau cần đủ `inference.json`, `inference.yml`, `inference.pdiparams`:
+
+```text
+.cache/paddlex/official_models/PP-OCRv5_mobile_det/
+.cache/paddlex/official_models/en_PP-OCRv5_mobile_rec/
+.cache/paddlex/official_models/en_PP-OCRv4_mobile_rec/  # nếu cần rollback
+```
+
+Không đổi tên weights v4 thành v5. Preflight từ chối thiếu file thay vì tải ngầm.
+Trong lần kiểm tra migration đã ghi nhận, cache chỉ có detector v5 và recognizer
+v4: **inference v5 mới bị chặn vì thiếu recognizer v5**. Chưa có baseline v5 mới
+được đo lại; hãy cung cấp asset trước khi chạy mặc định.
+
+### Dịch: chuẩn bị riêng, có tải mạng tường minh
+
+Runtime cần model đã chuyển đổi tại `models/opus-en-vi/ct2` và tokenizer trong
+`models/opus-en-vi`. Script chuẩn bị dùng thêm PyTorch và Transformers (không nằm
+trong dependency dịch runtime ở trên):
 
 ```sh
-PADDLE_PDX_CACHE_HOME="$PWD/.cache/paddlex" .venv/bin/python -m focuslens translate IMAGE.png
-# Nhiều ảnh: tái sử dụng cả OCR lẫn translator trong một process
-PADDLE_PDX_CACHE_HOME="$PWD/.cache/paddlex" .venv/bin/python -m focuslens translate A.jpg B.png --enhance
+uv pip install --python .venv/bin/python torch transformers
+.venv/bin/python scripts/prepare_translation.py
+```
+
+Đây là bước **chủ động tải**, không phải inference offline: script lấy
+`Helsinki-NLP/opus-mt-en-vi` tại revision
+`989c9fb9ec63987901022baf0182dcec3e149be6`, chuyển sang INT8 và ghi provenance/hash.
+Cần ít nhất 3 GB trống; tổng tải bị giới hạn 700 MB. Script không ghi đè thư mục
+không rỗng; nếu lỗi, giữ thư mục dở dang để người dùng tự di chuyển trước khi thử
+lại. Dependency chuyển đổi ở lệnh trên chưa được ghim thành môi trường tái lập.
+Máy offline cần được chuyển sẵn toàn bộ asset đã chuẩn bị; không chạy script tải.
+
+## Sử dụng
+
+```sh
+.venv/bin/python -m focuslens --help
 .venv/bin/python -m focuslens ocr IMAGE.png
-# Chỉ dùng LAN tin cậy; không mở camera firmware ra Internet
-.venv/bin/python -m focuslens capture http://CAMERA_IP/capture local.jpg
+.venv/bin/python -m focuslens translate IMAGE.png
+.venv/bin/python -m focuslens inference --image IMAGE.png
+
+# Rollback tường minh về recognizer v4; detector vẫn là v5
+.venv/bin/python -m focuslens ocr --recognizer v4 IMAGE.png
+.venv/bin/python -m focuslens ocr --recognizer v4 --mode word WORD.png
+.venv/bin/python -m focuslens translate --recognizer v4 IMAGE.png
+.venv/bin/python -m focuslens inference --recognizer v4 --image IMAGE.png
 ```
 
-Kết quả JSON gồm raw `lines`, `english`, `vietnamese`, `warnings`, transformations,
-timings. Paddle có thể in thông báo runtime riêng; không coi toàn stdout là một JSON
-document duy nhất. Capture không ghi đè, timeout socket 5s không phải deadline tổng;
-urllib có redirect, chỉ dùng URL tin cậy. Xem [README-camera.md](README-camera.md).
+API tương ứng: `OCRRuntime(recognizer_version='v4')` hoặc
+`engine(recognizer_version='v4')`. Chế độ word dành cho crop từ/dòng đã tách,
+không thay thế đánh giá detector trên ảnh nguyên trang.
+Xem [OCR và giới hạn ảnh](README-ocr.md), [camera ESP32-CAM](README-camera.md).
+Camera HTTP chỉ dùng trên LAN tin cậy; không có xác thực/TLS trong firmware mẫu.
 
-## Kiểm thử offline và inference thật
+## Bằng chứng thực nghiệm và giới hạn
+
+### So sánh DEV lịch sử: recognizer v4 → v5
+
+Trên **200 crop dòng in HierText DEV**, chỉ nhận dạng, không detector:
+
+| Recognizer | Exact | CER | WER |
+|---|---:|---:|---:|
+| v4 | 135/200 (67,5%) | 1,6993% | 11,1842% |
+| v5 | 175/200 (87,5%) | 0,5152% | 3,4539% |
+
+Có **45 cải thiện, 5 hồi quy**. Chuẩn hóa casefold và khoảng trắng, giữ dấu câu.
+Đây là dự đoán lịch sử đã audit với DEV đóng băng, không phải inference vừa chạy,
+không phải kiểm chứng held-out độc lập hay kết quả camera/full pipeline/dịch.
+Artifact lịch sử không đủ chứng minh hash weights, môi trường và protocol timing;
+không dùng timing cũ để cam kết tốc độ. Xem [báo cáo audit và hồi quy](focuslens/benchmarks/HIERTEXT_DEV_RECOGNIZER_COMPARISON.md).
 
 ```sh
-python3 camera_smoke.py
-.venv/bin/python focuslens_smoke.py
-.venv/bin/python ov3660_smoke.py
-.venv/bin/python pipeline_smoke.py
-.venv/bin/python benchmark_smoke.py
-# Chủ động chạy model thật, không nằm trong offline tests
-.venv/bin/python inference_smoke.py
-.venv/bin/python benchmark_iiit5k.py --count 100 --seed 20261021
+# Offline: cần artifact lịch sử và dữ liệu DEV cục bộ
+.venv/bin/python -m focuslens.benchmarks.recognizer_comparison audit
+# Chỉ sau khi có đủ asset v4/v5 và DEV; output phải chưa tồn tại
+.venv/bin/python -m focuslens.benchmarks.recognizer_comparison run --output results/recognizer-v5-dev-new
 ```
 
-Mỗi smoke dùng unittest.main trên đúng file, không discovery/tải model.
-Pipeline test có RED thiếu module trước GREEN, mock OCR/runtime, kiểm tra empty
-không dịch, thứ tự/ghép dòng, prefix/tokenization, model thiếu, giới hạn ảnh/câu,
-preprocess không sửa bytes gốc. Benchmark metrics cũng RED trước GREEN.
-Inference lưu `results/translation-smoke.json`; benchmark lưu `results/iiit5k.json`.
-IIIT5K phải tự chuẩn bị cục bộ: `datasets/iiit5k/testdata.csv` và ảnh ở
-`datasets/iiit5k/IIIT5K-Word_V3.0/IIIT5K/test/`; không có auto-download dataset.
+Runner mới ghi hash model/input/source, phiên bản runtime, lỗi từng dòng và
+protocol timing. IIIT5K v5 và held-out độc lập vẫn còn thiếu; TEST đã xem không
+được gọi là dữ liệu chưa từng thấy.
 
-### Kết quả thực đo, không phải chất lượng dịch đã chấm người
+### Baseline v4 đóng băng và dịch
 
-Input: **What does the man say he will do in July?**
-Output model: **Người đàn ông nói gì vào tháng Bảy?**
-0.054s inference, 1.427s translator init. Bản dịch bỏ sắc thái “he will do”:
-đây là smoke khả năng chạy, không phải minh chứng độ chính xác.
+- [Word baseline v1](focuslens/benchmarks/WORD_BASELINE.md): **2515/3000 exact**
+  trên IIIT5K TEST, recognizer **v4**. Không đổi nhãn thành kết quả v5.
+- [Full TEST và resize study](focuslens/benchmarks/IIIT5K_FULLTEST.md),
+  [OCR tuning](focuslens/benchmarks/OCR_TUNING.md),
+  [đánh giá và giới hạn](focuslens/benchmarks/EVALUATION.md) giữ phạm vi riêng.
+- [HierText lines](focuslens/benchmarks/HIERTEXT_LINES.md): 200 DEV + 500 TEST,
+  review bằng model, không phải audit con người hay bảo đảm câu tiếng Anh đầy đủ.
+- Translation peak RSS đã ghi nhận **332,1 MiB**; kích thước model INT8 không
+  phải RAM tiến trình. Không cam kết RAM dưới 100 MB hoặc latency 50–150 ms.
+  Chất lượng dịch và khả năng chịu lỗi OCR vẫn cần review phù hợp.
 
-OV3660 `crops/59.png`: OCR nguyên văn bắt đầu `.Wh wil be visting he company?`,
-5 lines; EN ghép giữ nguyên lỗi. VI bắt đầu `Anh ta có khách không?` rồi có câu
-vô nghĩa. OCR 0.963s, dịch 0.162s, OCR init 3.855s; tổng process 7.005s.
-Không có groundtruth ảnh người dùng, không tính accuracy. Không tự sửa lỗi.
+## Kiểm tra
 
-Benchmark IIIT5K: detection+recognition trên word crops, **không phải recognizer-only**;
-100/3000 heldout test, seed 20261021, sample từ IDs sort, không dùng train/lexicon,
-không tuning. Chuẩn hóa Unicode casefold + gộp/strip whitespace, giữ punctuation.
-CER là tổng Levenshtein/tổng ký tự reference; exact match theo cả word crop.
-Errors tính như dự đoán rỗng; warm p50/p95 nearest-rank, gồm decode/preprocess/OCR/
-assembly, không gồm file read/init/1 warmup mỗi cấu hình. Report giữ IDs, SHA256 ảnh,
-hash CSV, versions, config và predictions để tái lập. Không suy luận sentence/VI
-accuracy từ tập từ đơn.
+```sh
+# Xác minh bằng chứng word v4 có sẵn, không đo baseline mới
+.venv/bin/python -m focuslens.benchmarks.word_baseline
+# Kiểm tra cô lập bằng mock; không cần camera thật
+.venv/bin/python -m unittest tests/test_ov3660.py
+python3 -m unittest tests/test_camera.py
+```
 
-| Cấu hình | CER | Word exact match | Empty / lỗi | Warm p50 / p95 |
-| --- | ---: | ---: | ---: | ---: |
-| Baseline | 18.5804% | 67/100 | 11 / 0 | 67.42 / 88.90 ms |
-| Mild preprocessing | 17.1190% | 70/100 | 11 / 0 | 71.81 / 87.26 ms |
+Các verifier cần dữ liệu/artifact cục bộ tương ứng. Hướng dẫn compile smoke và
+điều kiện bảo vệ header Wi-Fi nằm trong [README-camera.md](README-camera.md).
+Test mock không chứng minh chất lượng OCR, dịch hay phần cứng hoạt động.
 
-Run cuối tuần tự, không chạy inference khác đồng thời: init 4.602s,
-18.491s measured trong script / 19.046s process wall. Một run nhỏ, không có
-confidence interval, không kết luận preprocessing luôn tốt hơn hay nhanh nhất;
-baseline vẫn mặc định. Khác biệt p95 nhỏ có thể là nhiễu. Model cache được tái sử dụng.
-Tokenizer local đã đối chiếu khớp MarianTokenizer trên câu smoke gồm prefix và EOS.
-Smoke cuối: pipeline 5 tests/0.261s wall; benchmark metrics 2/0.127s;
-camera 2/0.075s, legacy pipeline 5/0.206s, OV runner 2/0.137s. Không chạy full suite.
+## Kiến trúc đang triển khai
 
-Các timing lịch sử CORD/OV3660 ở [README-ocr.md](README-ocr.md) không phải lần đo
-benchmark hiện tại. CORD Indonesia có annotation một phần, không dùng chấm English.
-Không kiểm tra flash/hardware trong task này. Chưa có TTS, handwriting chuyên biệt,
-server hay app UI; cần đánh giá layout và người chấm dịch trước dùng thực tế.
+```text
+Ảnh file / capture HTTP trên LAN → kiểm tra/tiền xử lý ảnh
+  → detector v5 + recognizer v5 (hoặc rollback v4)
+  → ghép dòng một cột → OPUS-MT/CTranslate2 INT8 → kết quả và timings
+```
+
+- [contracts.py](focuslens/contracts.py): `Frame`, `TextLine`.
+- [imaging.py](focuslens/imaging.py): decode, giới hạn ảnh, tiền xử lý tùy chọn.
+- [ocr.py](focuslens/ocr.py): runtime OCR và model local.
+- [assembly.py](focuslens/assembly.py): sắp xếp/ghép dòng; không phải layout đa cột.
+- [translation.py](focuslens/translation.py): dịch cục bộ.
+- [pipeline.py](focuslens/pipeline.py), [inference.py](focuslens/inference.py): điều phối và timing.
+- [benchmarks](focuslens/benchmarks/), [scripts](scripts/), [tests](tests/): đánh giá, chuẩn bị và kiểm thử.
+
+## Roadmap — chưa phải khả năng hiện tại
+
+1. Cung cấp asset v5, đo lại có provenance và kiểm chứng held-out độc lập.
+2. Đánh giá ảnh camera có ground truth, bố cục nhiều cột và chất lượng câu đầu-cuối.
+3. Đánh giá model dịch thay thế và cơ chế cảnh báo OCR không chắc chắn.
+4. Chỉ khi có nhu cầu riêng: API server, xử lý ảnh nâng cao hoặc backend online;
+   hiện chưa có hybrid/cloud routing được triển khai.
 
 ## Giấy phép
 
-Mã/tài liệu gốc [MIT](LICENSE), © 2026 Ho Dang Thai Duy. Không tái cấp phép weights,
-firmware hay dataset: Espressif Apache-2.0, CORD CC BY 4.0; Paddle và OPUS weights
-có model card Apache-2.0. [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) có nguồn,
-điều khoản dependencies và citation IIIT5K (Mishra, Alahari, Jawahar, BMVC 2012).
-Không phân phối ảnh người dùng, IIIT5K, weights, firmware binary hay secrets.
+Mã tự phát triển dùng [MIT](LICENSE). Model, dữ liệu và firmware tham chiếu giữ
+giấy phép riêng; xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

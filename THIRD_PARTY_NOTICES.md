@@ -53,8 +53,13 @@ have their own licenses; this is not a claim that all dependencies are MIT or Ap
 | PP-OCRv5_mobile_det | [PaddlePaddle model card](https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det/blob/main/README.md), `license: apache-2.0` |
 | en_PP-OCRv4_mobile_rec | [PaddlePaddle model card](https://huggingface.co/PaddlePaddle/en_PP-OCRv4_mobile_rec/blob/main/README.md), `license: apache-2.0` |
 
+The new default `en_PP-OCRv5_mobile_rec` is not redistributed. Consult its
+[official model card](https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec/blob/main/README.md)
+and the exact downloaded artifact license before provisioning; this migration
+has not independently rechecked that card or downloaded v5 weights.
+
 These declarations are evidence for the named models, checked independently of
-the software licenses. Weights are downloaded by PaddleOCR on first use and are
+the software licenses. Current runtime requires pre-provisioned local weights and they are
 **not redistributed here**. Model cards are mutable and downloads may use other
 official mirrors; consult the upstream license/model card for the exact artifact
 you download and before redistribution. This repository makes no independent

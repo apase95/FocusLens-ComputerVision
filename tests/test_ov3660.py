@@ -1,18 +1,22 @@
-"""Isolated stdlib unittest runner; no discovery or real model inference."""
+"""Isolated stdlib unittest runner for OV3660 report rendering and runner mocking."""
 import tempfile
 import unittest
 from pathlib import Path
 from PIL import Image
-from ocr_ov3660 import run_images, render
+
+from focuslens.benchmarks.ov3660 import render, run_images
 
 
 class FakeEngine:
     def predict(self, path):
-        return [{'rec_texts': ['Raw mispeled text'], 'rec_scores': [.25],
-                 'rec_polys': [[[0, 0], [1, 0], [1, 1]]]}]
+        return [{
+            'rec_texts': ['Raw mispeled text'],
+            'rec_scores': [0.25],
+            'rec_polys': [[[0, 0], [1, 0], [1, 1]]],
+        }]
 
 
-class Smoke(unittest.TestCase):
+class TestOV3660Benchmark(unittest.TestCase):
     def test_happy_report(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -27,6 +31,7 @@ class Smoke(unittest.TestCase):
         class EmptyEngine:
             def predict(self, path):
                 return []
+
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / 'bad.png').write_bytes(b'bad')

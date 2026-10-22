@@ -6,7 +6,8 @@ from pathlib import Path
 from urllib.request import urlopen
 from focuslens.camera import validate
 
-ROOT = Path(__file__).resolve().parent / 'samples/cord'
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+ROOT = PROJECT_ROOT / 'samples/cord'
 URL = 'https://datasets-server.huggingface.co/rows?dataset=naver-clova-ix%2Fcord-v2&config=default&split=test&offset=0&length=10'
 
 

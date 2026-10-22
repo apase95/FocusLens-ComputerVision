@@ -1,18 +1,19 @@
-"""Offline isolated runner; unittest.main, no discovery or downloads."""
+"""Offline isolated pipeline runner; unittest.main, no discovery or downloads."""
 import io
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import Mock
 from PIL import Image
-from focuslens.pipeline import Pipeline
-from focuslens.imaging import prepare
+
 from focuslens.assembly import assemble
 from focuslens.contracts import TextLine
+from focuslens.imaging import prepare
+from focuslens.pipeline import Pipeline
 from focuslens.translation import Translator, source_tokens
 
 
-class Smoke(unittest.TestCase):
+class TestPipeline(unittest.TestCase):
     def image(self):
         buf = io.BytesIO()
         Image.new('RGB', (12, 8), 'white').save(buf, 'PNG')
@@ -20,13 +21,17 @@ class Smoke(unittest.TestCase):
 
     def test_pipeline_and_empty(self):
         ocr, translator = Mock(), Mock()
-        ocr.predict.return_value = [{'rec_texts': ['Hello world.'], 'rec_scores': [.8],
-                                    'rec_polys': [[[0, 0], [10, 0], [10, 5], [0, 5]]]}]
+        ocr.predict.return_value = [{
+            'rec_texts': ['Hello world.'],
+            'rec_scores': [0.8],
+            'rec_polys': [[[0, 0], [10, 0], [10, 5], [0, 5]]],
+        }]
         translator.translate.return_value = 'Xin chào thế giới.'
         result = Pipeline(ocr, translator).process(self.image())
         self.assertEqual(result['english'], 'Hello world.')
         self.assertEqual(result['vietnamese'], 'Xin chào thế giới.')
         translator.translate.assert_called_once_with('Hello world.')
+
         ocr.predict.return_value = []
         translator.reset_mock()
         self.assertEqual(Pipeline(ocr, translator).process(self.image())['vietnamese'], '')
@@ -41,8 +46,10 @@ class Smoke(unittest.TestCase):
         for bad in (b'x' * 8_000_001, b'bad'):
             with self.assertRaises(ValueError):
                 prepare(bad)
-        lines = [TextLine('world.', .9, [[0, 12], [10, 12], [10, 20]]),
-                 TextLine('Hello', .9, [[0, 0], [10, 0], [10, 8]])]
+        lines = [
+            TextLine('world.', 0.9, [[0, 12], [10, 12], [10, 20]]),
+            TextLine('Hello', 0.9, [[0, 0], [10, 0], [10, 8]]),
+        ]
         self.assertEqual(assemble(lines), 'Hello world.')
 
     def test_translation_tokens_and_missing(self):
