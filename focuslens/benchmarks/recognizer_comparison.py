@@ -42,7 +42,7 @@ def audit(artifact, rows):
                 provenance='Historical predictions audited against frozen DEV; timing/weights not recoverable from predictions')
 
 
-def run(output, rows):
+def run(output, rows, *, scope='whole-line DEV recognition only; not independent held-out or full pipeline', provenance=None):
     from ..ocr import OCRRuntime, model_options
     from ..imaging import prepare
     from ..assembly import assemble
@@ -53,7 +53,7 @@ def run(output, rows):
         root = Path(model_options('rec', recognizer)['model_dir'])
         assets[recognizer] = {f: sha((root/f).read_bytes()) for f in
                               ('inference.json', 'inference.yml', 'inference.pdiparams')}
-    protocol = dict(scope='whole-line DEV recognition only; not independent held-out or full pipeline',
+    protocol = dict(scope=scope, provenance=provenance,
                     assets=assets, python=platform.python_version(),
                     runtime={p: version(p) for p in ('paddleocr', 'paddlex', 'paddlepaddle', 'numpy', 'Pillow')},
                     inputs=[{k: r[k] for k in ('id', 'sha256', 'reference')} for r in rows],

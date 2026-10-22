@@ -1,5 +1,11 @@
 # FocusLens stages 1–4
 
+> **Host reference / historical evidence only.** The project now targets a fully
+> standalone Luckfox Pico Max: see [offline architecture](docs/OFFLINE_ARCHITECTURE.md).
+> These Python/CPU instructions and measurements are not ARM32 installation,
+> RKNN conversion evidence or board performance. Embedded dictionary/UI/speech
+> remain planned; the historical statements below describe the host work only.
+
 Historical OCR-only notes below; current translation setup and benchmark are in
 [README.md](README.md). No TTS or paid cloud service.
 System Python 3.14.7 is unchanged. Installed runtime is isolated CPython 3.12.14.
@@ -8,8 +14,10 @@ Paddle 3.2.2 cp312 CPU wheel installed successfully from the package index.
 
 **Before running OCR:** provision the local detector and recognizer assets as
 described in [README model prerequisites](README.md#ocr-cung-cấp-asset-thủ-công-trước-khi-chạy).
-The v5 recognizer was missing at migration time; inference will fail explicitly
-until it is supplied (or use the documented v4 rollback with local v4 assets).
+The v5 recognizer was missing at migration time, but was officially provisioned
+and forward-tested on 2026-10-22. Use `.venv/bin/python -m scripts.prepare_ocr`
+on a new machine; it refuses overwrite and records immutable revision/hashes.
+See [fresh recognition baseline](focuslens/benchmarks/RECOGNIZER_V5_BASELINE.md).
 Sample retrieval below is an explicit network operation, not offline setup.
 
 ```sh

@@ -60,10 +60,17 @@ One first-image warmup per model is excluded from warm decode+prepare+recognitio
 assembly timing, as are disk reads. Models run serially v4 then v5; this is not a
 randomized/repeated performance study and no process-RAM comparison is claimed.
 
-Local cache inspected during migration contained only v4 recognition and v5
-detection. **Fresh v5 inference and IIIT5K/independent held-out evaluation are
-blocked by missing v5 recognition weights.** No download was attempted. DEV is
-selection evidence, not independent held-out data; already inspected TEST must
-not be described as unseen. Frozen v4 IIIT5K evidence remains unchanged and its
-offline word verifier still reports 2515/3000 exact. No new full-pipeline v5
-accuracy, sentence-readiness or translation result is claimed.
+## Fresh measurement — 2026-10-22
+
+Official v5 weights have now been provisioned and forward-tested. The new run
+in `results/recognizer-v5-dev-baseline` reproduces 135/200 versus 175/200 exact,
+the CER/WER above, and the same 45 improvements / five regressions. Zero errors.
+Fresh warm p50/p95: v4 **152.61/330.99 ms**, v5 **164.17/392.42 ms**.
+These are a single sequential trial, not evidence of equal speed or a speedup.
+The historical evidence and its original timing claims above remain separate.
+
+[Fresh v5 baseline](RECOGNIZER_V5_BASELINE.md) records immutable official model
+revision, hashes and supplemental IIIT5K/HierText TEST results. DEV is selection
+evidence; previously inspected TEST is not unseen and pretraining overlap is
+unknown. Frozen v4 word evidence remains unchanged (2515/3000 exact). No new
+full-pipeline, sentence-readiness, camera or translation quality is claimed.

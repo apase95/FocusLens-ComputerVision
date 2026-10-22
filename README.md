@@ -1,9 +1,24 @@
-# FocusLens — OCR và dịch Anh–Việt cục bộ
+# FocusLens — thiết bị đọc từ Anh–Việt offline trên Luckfox
 
-FocusLens nhận ảnh từ file hoặc camera, đọc chữ tiếng Anh trên CPU và dịch sang
-tiếng Việt. Runtime hiện tại dùng **PP-OCRv5_mobile_det + en_PP-OCRv5_mobile_rec**,
-ghép dòng một cột và dịch bằng **OPUS-MT qua CTranslate2 INT8**. Không có routing
-cloud, dịch qua API hay tự động chọn model theo kết nối mạng.
+Mục tiêu: **Luckfox Pico Max (RV1106G3)** tự chụp → nhận dạng → tra nghĩa
+Anh–Việt + IPA → hiển thị → đọc tiếng Anh, hoàn toàn trên thiết bị; không cần
+PC, điện thoại, cloud hoặc server LAN khi sử dụng. **Đang thiết kế/port, chưa có
+runtime Luckfox hoạt động hoặc số đo phần cứng.** MVP là một từ trong ROI có hướng
+dẫn, không phải dịch cả câu bằng từ điển.
+
+Mã hiện có là **Python host reference trên PC**: PP-OCRv5_mobile_det +
+en_PP-OCRv5_mobile_rec trên CPU, ghép dòng một cột và OPUS-MT/CTranslate2 INT8.
+Chưa có SQLite dictionary, UI hay TTS nhúng. PC chỉ được phép dùng để chuẩn bị
+asset, export/quantize/calibrate model và flash cho thiết bị mục tiêu; không xử lý
+thay thiết bị khi chạy. Các lệnh bên dưới dành cho host, **không phải hướng dẫn
+cài Python lên Luckfox ARM32**. Không có routing cloud hoặc tải model ngầm.
+
+## Tài liệu mục tiêu
+
+- [Chỉ mục](docs/README.md) · [kiến trúc offline](docs/OFFLINE_ARCHITECTURE.md)
+- [Phần cứng và nguồn chính thức](docs/LUCKFOX_HARDWARE.md)
+- [Roadmap và cổng kiểm chứng](docs/ROADMAP.md) · [quyết định/phạm vi](docs/SESSION_DECISIONS.md)
+- [OCR host](README-ocr.md) · [camera ESP32 lịch sử](README-camera.md)
 
 ## Cài đặt và chuẩn bị model
 
@@ -31,9 +46,14 @@ Mỗi thư mục sau cần đủ `inference.json`, `inference.yml`, `inference.p
 ```
 
 Không đổi tên weights v4 thành v5. Preflight từ chối thiếu file thay vì tải ngầm.
-Trong lần kiểm tra migration đã ghi nhận, cache chỉ có detector v5 và recognizer
-v4: **inference v5 mới bị chặn vì thiếu recognizer v5**. Chưa có baseline v5 mới
-được đo lại; hãy cung cấp asset trước khi chạy mặc định.
+Chuẩn bị recognizer v5 bằng lệnh tải mạng tường minh:
+```sh
+.venv/bin/python -m scripts.prepare_ocr
+```
+Script kiểm tra model card Apache-2.0 qua API PaddlePaddle/Hugging Face, ghim
+revision bất biến, giới hạn tải/thời gian, ghi SHA256 và không ghi đè cache.
+Ngày 2026-10-22 đã tải weights chính thức và chạy inference thực thành công;
+xem [baseline v5 mới](focuslens/benchmarks/RECOGNIZER_V5_BASELINE.md).
 
 ### Dịch: chuẩn bị riêng, có tải mạng tường minh
 
@@ -72,10 +92,15 @@ Máy offline cần được chuyển sẵn toàn bộ asset đã chuẩn bị; k
 API tương ứng: `OCRRuntime(recognizer_version='v4')` hoặc
 `engine(recognizer_version='v4')`. Chế độ word dành cho crop từ/dòng đã tách,
 không thay thế đánh giá detector trên ảnh nguyên trang.
-Xem [OCR và giới hạn ảnh](README-ocr.md), [camera ESP32-CAM](README-camera.md).
-Camera HTTP chỉ dùng trên LAN tin cậy; không có xác thực/TLS trong firmware mẫu.
+Xem [OCR và giới hạn ảnh](README-ocr.md), [camera ESP32-CAM lịch sử](README-camera.md).
+Capture HTTP là đường thử nghiệm host cũ, không thuộc kiến trúc standalone mới.
+Chỉ dùng trên LAN tin cậy; firmware mẫu không có xác thực/TLS.
 
 ## Bằng chứng thực nghiệm và giới hạn
+
+Tất cả số liệu dưới đây là **PC/CPU**, không phải RV1106/NPU. Benchmark gốc
+được giữ nguyên; chưa xác minh chuyển recognizer v5 sang RKNN. Phân tích lỗi:
+[paired v5 cases](focuslens/benchmarks/RECOGNIZER_V5_ERROR_ANALYSIS.md).
 
 ### So sánh DEV lịch sử: recognizer v4 → v5
 
@@ -100,8 +125,11 @@ không dùng timing cũ để cam kết tốc độ. Xem [báo cáo audit và h�
 ```
 
 Runner mới ghi hash model/input/source, phiên bản runtime, lỗi từng dòng và
-protocol timing. IIIT5K v5 và held-out độc lập vẫn còn thiếu; TEST đã xem không
-được gọi là dữ liệu chưa từng thấy.
+protocol timing. Đo mới ngày 2026-10-22: v5 exact **175/200 DEV**, **2541/3000
+IIIT5K TEST**, **424/500 HierText TEST**, không exception. So với v4 có lần lượt
+5, 67, 10 hồi quy; không phải cải thiện mọi ảnh. Xem protocol, CER/WER và latency
+trong [baseline v5](focuslens/benchmarks/RECOGNIZER_V5_BASELINE.md).
+Held-out độc lập vẫn thiếu; TEST đã xem không được gọi là dữ liệu chưa từng thấy.
 
 ### Baseline v4 đóng băng và dịch
 
@@ -130,7 +158,7 @@ Các verifier cần dữ liệu/artifact cục bộ tương ứng. Hướng dẫ
 điều kiện bảo vệ header Wi-Fi nằm trong [README-camera.md](README-camera.md).
 Test mock không chứng minh chất lượng OCR, dịch hay phần cứng hoạt động.
 
-## Kiến trúc đang triển khai
+## Kiến trúc host reference hiện có (không phải runtime nhúng)
 
 ```text
 Ảnh file / capture HTTP trên LAN → kiểm tra/tiền xử lý ảnh
@@ -148,11 +176,15 @@ Test mock không chứng minh chất lượng OCR, dịch hay phần cứng ho�
 
 ## Roadmap — chưa phải khả năng hiện tại
 
-1. Cung cấp asset v5, đo lại có provenance và kiểm chứng held-out độc lập.
-2. Đánh giá ảnh camera có ground truth, bố cục nhiều cột và chất lượng câu đầu-cuối.
-3. Đánh giá model dịch thay thế và cơ chế cảnh báo OCR không chắc chắn.
-4. Chỉ khi có nhu cầu riêng: API server, xử lý ảnh nâng cao hoặc backend online;
-   hiện chưa có hybrid/cloud routing được triển khai.
+1. Xác minh BSP/camera/display/audio/nguồn trên Pico Max; boot không mạng.
+2. Kiểm chứng recognizer RKNN + CTC, parity INT8 và ngân sách RAM trên board.
+3. Tích hợp từ điển EN–VI/IPA có quyền phân phối, UI và audio/TTS offline.
+4. Đo camera → âm thanh, RSS/PSS, p50/p95, nguồn và độ bền; đánh giá độc lập.
+5. Dịch câu là nhánh feasibility riêng: host OPUS/CTranslate2 peak RSS **332,1 MiB**
+   vượt toàn bộ **256 MB RAM** của board; chưa có cam kết chạy ARM32 hay giải pháp thay thế.
+
+Xem [roadmap có điều kiện nghiệm thu](docs/ROADMAP.md). Không đặt backend online
+hoặc server LAN làm điều kiện cho sản phẩm standalone.
 
 ## Giấy phép
 

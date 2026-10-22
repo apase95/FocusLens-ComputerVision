@@ -1,0 +1,839 @@
+{
+  "date": "2026-10-22",
+  "implementer_id": "general current session; ID not exposed",
+  "limitation": "Previously exposed labels; pretraining overlap unknown; recognition only, not independent heldout",
+  "model_provenance": {
+    "api": "https://huggingface.co/api/models/PaddlePaddle/en_PP-OCRv5_mobile_rec",
+    "files": {
+      "README.md": {
+        "bytes": 6908,
+        "sha256": "4c1cfd6e103b0966fe97505b5254cfa35a931d47d7effca97a9db47fb57dd699",
+        "url": "https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec/resolve/267c36e24c331595590fe7bd72bde2436fd286f2/README.md"
+      },
+      "inference.json": {
+        "bytes": 217712,
+        "sha256": "fd1b6ec722ea841a72d3ba43e527df1d1066d5d7808e0503ee3eec7265188753",
+        "url": "https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec/resolve/267c36e24c331595590fe7bd72bde2436fd286f2/inference.json"
+      },
+      "inference.pdiparams": {
+        "bytes": 7772315,
+        "sha256": "3ec8a97ed6cefe8568d3e2ee90bb193299b566a7661aa4fd52d224b96b59f66b",
+        "url": "https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec/resolve/267c36e24c331595590fe7bd72bde2436fd286f2/inference.pdiparams"
+      },
+      "inference.yml": {
+        "bytes": 3964,
+        "sha256": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067",
+        "url": "https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec/resolve/267c36e24c331595590fe7bd72bde2436fd286f2/inference.yml"
+      }
+    },
+    "license": "apache-2.0",
+    "repository": "PaddlePaddle/en_PP-OCRv5_mobile_rec",
+    "revision": "267c36e24c331595590fe7bd72bde2436fd286f2"
+  },
+  "provider_model": "openai/gpt-6.1-sol",
+  "runs": {
+    "dev": {
+      "count": 200,
+      "directory": "results/recognizer-v5-dev-baseline",
+      "evidence_sha256": {
+        "changes.json": "2d5da2a4c11daf893cb5cc0eb550f815faad043c42f02bf27c8b76f118a0ae21",
+        "protocol.json": "aeaf6998be67fbfffa00e491bee9a7ad6b843e9dc4791617bf49e7c783a10867",
+        "v4.json": "c67199a5fd6a37d089c6612d97ee468dc570e0b95ab1392dbc76e00b58125325",
+        "v5.json": "72080fceecd08c090a88459786d05ace7dc3948deb4cca337278e53aeab570ba"
+      },
+      "improved": 45,
+      "initialization_and_warmup_seconds": {
+        "v4": 2.768375487999947,
+        "v5": 0.34189254899865773
+      },
+      "post_run_provenance": {
+        "adapter_sha256": "9beba9e522d6f404dca6a3090ec1b2e8dce5318eed646598a4fc15dfe913c27f",
+        "capture": "post-run snapshot binding; not at-run capture",
+        "finalized_sha256": "b442b655978258f3ee34abab9331f6a283ddc5139dad060c807113434d39a537",
+        "source_manifest_sha256": "204ec63c0176fd2c0401f890ad3252a115a98a308a08550a5bf50856d4df95e0"
+      },
+      "protocol": {
+        "assets": {
+          "v4": {
+            "inference.json": "7a2302e09f0d501458db082cbcf21cdcb3a8d6dc9a143f73b17e297505f922f9",
+            "inference.pdiparams": "75f64a1ffb70c56b7a25655963ca16f5bf3286202e3f52ac972bee05cdee2f56",
+            "inference.yml": "5f6b19b6b09b6b6f7924de6c25076d0b3528b6f641e64d4f12e6e6207ec33200"
+          },
+          "v5": {
+            "inference.json": "fd1b6ec722ea841a72d3ba43e527df1d1066d5d7808e0503ee3eec7265188753",
+            "inference.pdiparams": "3ec8a97ed6cefe8568d3e2ee90bb193299b566a7661aa4fd52d224b96b59f66b",
+            "inference.yml": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067"
+          }
+        },
+        "cpu_threads": 2,
+        "device": "cpu",
+        "enable_mkldnn": false,
+        "normalization": "casefold/collapsed whitespace; punctuation retained",
+        "provenance": null,
+        "python": "3.12.14",
+        "runtime": {
+          "Pillow": "12.0.0",
+          "numpy": "2.5.4",
+          "paddleocr": "3.3.2",
+          "paddlepaddle": "3.2.2",
+          "paddlex": "3.3.13"
+        },
+        "scope": "whole-line DEV recognition only; not independent held-out or full pipeline",
+        "source_sha256": {
+          "focuslens/assembly.py": "31fdc0b027c47523c048b134c8b75e855e958d93f2c3d2d13309924786c5485f",
+          "focuslens/benchmarks/metrics.py": "f6fb598be92d2cede31153e9860cf005a5a3dc791e597d33ce03401ca04f2e0c",
+          "focuslens/benchmarks/recognizer_comparison.py": "9c625f7ede54b588c7a23083aac965ea76ae9f4849e2972f7021c32a9d13c3df",
+          "focuslens/imaging.py": "aec4ef21a736cbb73505c1bdd9ba0ef6f6b2c174fa2dc2bc7d3c4011b3a3d8c7",
+          "focuslens/ocr.py": "b59131bd0152543e749817f1f82c76894b3fbc52c5b84d892af637ddb0ef270f"
+        },
+        "timing": "serial v4 then v5; one first-image warmup each; decode+prepare+OCR+assembly; disk reads excluded; single trial"
+      },
+      "regressed": 5,
+      "regressions": [
+        {
+          "id": "validation/b67b8f2a0851725b/p0003/l0000",
+          "reference": "MARTA'S CODE OF CONDUCT",
+          "v4": "MARTA'S CODE OF CONDUCT",
+          "v5": "ARTA'S COME OF CONDUCT"
+        },
+        {
+          "id": "validation/b67b8f2a0851725b/p0004/l0000",
+          "reference": "Arguments & Loud Talking",
+          "v4": "Arguments & Loud Talking",
+          "v5": "Arcuments & Loud Talking"
+        },
+        {
+          "id": "validation/8f35f982d5ad579a/p0000/l0000",
+          "reference": "June sounds like a lucky lady...",
+          "v4": "June sounds like a lucky lady...",
+          "v5": "June sounds like a lucky lady.."
+        },
+        {
+          "id": "validation/611072ec17a82276/p0004/l0000",
+          "reference": "1st Intel employee blog",
+          "v4": "1st Intel employee blog",
+          "v5": "1 st Intel employee blog"
+        },
+        {
+          "id": "validation/7e96140176dfa7c4/p0014/l0005",
+          "reference": "richly flavored with an Episcopal Church heritage.",
+          "v4": "richly flavored with an Episcopal Church heritage.",
+          "v5": "richly fl avored with an Episcopal Church heritage."
+        }
+      ],
+      "summaries": {
+        "v4": {
+          "cer": 0.01698927725943462,
+          "denominator_policy": "micro edit sums / max(1, reference units); insertions may exceed 1",
+          "empty": 0,
+          "empty_without_error": 0,
+          "errors": 0,
+          "exact_match": 0.675,
+          "reference_characters": 7181,
+          "reference_words": 1216,
+          "taxonomy": {
+            "character_or_word_substitution": 20,
+            "exact": 135,
+            "punctuation_only": 8,
+            "spacing_only": 26,
+            "word_count_mismatch": 11
+          },
+          "warm_p50_seconds": 0.1526104860004125,
+          "warm_p95_seconds": 0.3309904390007432,
+          "wer": 0.1118421052631579,
+          "word_exact_match": 0.675
+        },
+        "v5": {
+          "cer": 0.005152485726221975,
+          "denominator_policy": "micro edit sums / max(1, reference units); insertions may exceed 1",
+          "empty": 0,
+          "empty_without_error": 0,
+          "errors": 0,
+          "exact_match": 0.875,
+          "reference_characters": 7181,
+          "reference_words": 1216,
+          "taxonomy": {
+            "character_or_word_substitution": 8,
+            "exact": 175,
+            "punctuation_only": 4,
+            "spacing_only": 9,
+            "word_count_mismatch": 4
+          },
+          "warm_p50_seconds": 0.1641737319987442,
+          "warm_p95_seconds": 0.39241788599974825,
+          "wer": 0.03453947368421053,
+          "word_exact_match": 0.875
+        }
+      }
+    },
+    "hiertext_test": {
+      "count": 500,
+      "directory": "results/recognizer-v5-hiertext-test-baseline",
+      "evidence_sha256": {
+        "changes.json": "832ad74bf091d0e0f31c1558074a8b28f56a75def3198e490bd745e5f625cefb",
+        "protocol.json": "b7c2282d72052efb0ecb59289bdc8ecb52ee167ca02873c5ba68c4ed9173b330",
+        "v4.json": "a00f288e34f64a6eadaad52545b073e5bf021f0e1e565e1c7800b2e37f9e08ee",
+        "v5.json": "f23202d22e48e5c5a91fc3db221759516bc48c27671ad13b270fc27a8c055f63"
+      },
+      "improved": 160,
+      "initialization_and_warmup_seconds": {
+        "v4": 2.4959375010002987,
+        "v5": 0.3526935659992887
+      },
+      "protocol": {
+        "assets": {
+          "v4": {
+            "inference.json": "7a2302e09f0d501458db082cbcf21cdcb3a8d6dc9a143f73b17e297505f922f9",
+            "inference.pdiparams": "75f64a1ffb70c56b7a25655963ca16f5bf3286202e3f52ac972bee05cdee2f56",
+            "inference.yml": "5f6b19b6b09b6b6f7924de6c25076d0b3528b6f641e64d4f12e6e6207ec33200"
+          },
+          "v5": {
+            "inference.json": "fd1b6ec722ea841a72d3ba43e527df1d1066d5d7808e0503ee3eec7265188753",
+            "inference.pdiparams": "3ec8a97ed6cefe8568d3e2ee90bb193299b566a7661aa4fd52d224b96b59f66b",
+            "inference.yml": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067"
+          }
+        },
+        "cpu_threads": 2,
+        "device": "cpu",
+        "enable_mkldnn": false,
+        "normalization": "casefold/collapsed whitespace; punctuation retained",
+        "provenance": {
+          "adapter_sha256": "566c33a30e006d072e009d15d5ef3d676066902939e02899bdb9a30c96078a7c",
+          "finalized_sha256": "b442b655978258f3ee34abab9331f6a283ddc5139dad060c807113434d39a537",
+          "manifest_sha256": "1b0da58d53be35e18cb7ae41016b77955cf8c21354f3b4babd3c7b8d6f597b66"
+        },
+        "python": "3.12.14",
+        "runtime": {
+          "Pillow": "12.0.0",
+          "numpy": "2.5.4",
+          "paddleocr": "3.3.2",
+          "paddlepaddle": "3.2.2",
+          "paddlex": "3.3.13"
+        },
+        "scope": "hiertext-test recognition only; previously exposed TEST; pretraining overlap unknown",
+        "source_sha256": {
+          "focuslens/assembly.py": "31fdc0b027c47523c048b134c8b75e855e958d93f2c3d2d13309924786c5485f",
+          "focuslens/benchmarks/metrics.py": "f6fb598be92d2cede31153e9860cf005a5a3dc791e597d33ce03401ca04f2e0c",
+          "focuslens/benchmarks/recognizer_comparison.py": "9c625f7ede54b588c7a23083aac965ea76ae9f4849e2972f7021c32a9d13c3df",
+          "focuslens/imaging.py": "aec4ef21a736cbb73505c1bdd9ba0ef6f6b2c174fa2dc2bc7d3c4011b3a3d8c7",
+          "focuslens/ocr.py": "b59131bd0152543e749817f1f82c76894b3fbc52c5b84d892af637ddb0ef270f"
+        },
+        "timing": "serial v4 then v5; one first-image warmup each; decode+prepare+OCR+assembly; disk reads excluded; single trial"
+      },
+      "regressed": 10,
+      "regressions": [
+        {
+          "id": "test/2fffa817f27bff60/p0006/l0001",
+          "reference": "\"What do you say,",
+          "v4": "\"What do you say,",
+          "v5": "\"What do you say"
+        },
+        {
+          "id": "test/3f7e30601c614dfb/p0006/l0002",
+          "reference": "a velocity of seventy-five miles an hour,",
+          "v4": "a velocity of seventy-five miles an hour,",
+          "v5": "a velocity of seventy-five miles an hour"
+        },
+        {
+          "id": "test/6c824b94a5da4b5f/p0030/l0000",
+          "reference": "WYTCHY LIVE FOLLOWED BY ZOREE @",
+          "v4": "WYTCHY LIVE FOLLOWED BY ZOREE @",
+          "v5": "WYT CHY LIVE FOLLOWED BY ZOREE @"
+        },
+        {
+          "id": "test/8c3d8ffb18cb9bcd/p0003/l0000",
+          "reference": "indoor pool, deck, whirlpool and saunas",
+          "v4": "indoor pool, deck, whirlpool and saunas",
+          "v5": "indoor pool, deck, whirlpool and saunas."
+        },
+        {
+          "id": "test/af63d5d96821eb0b/p0000/l0011",
+          "reference": "The City of San Francisco",
+          "v4": "The City of San Francisco",
+          "v5": "The City of San Francisce"
+        },
+        {
+          "id": "test/76a871cad95b36a6/p0003/l0000",
+          "reference": "get the app buses.co.uk/app",
+          "v4": "get the app buses.co.uk/app",
+          "v5": "t te pp/p"
+        },
+        {
+          "id": "test/6b31d07964c69c6d/p0006/l0000",
+          "reference": "+Add Coins & Cash",
+          "v4": "+Add Coins & Cash",
+          "v5": "+ Add Coins & Cash"
+        },
+        {
+          "id": "test/cc5f36c443a62792/p0001/l0005",
+          "reference": "If you are currently having an affair with a sibling of your",
+          "v4": "If you are currently Having an affair with a sibling of your",
+          "v5": "If you are currently having an affair with a ibling of your"
+        },
+        {
+          "id": "test/5eef9ce65393ccb1/p0046/l0000",
+          "reference": "Quickfoot Cat Burglar",
+          "v4": "Quickfoot Cat Burglar",
+          "v5": "Quickfo ot Cat Burglar"
+        },
+        {
+          "id": "test/ec698d4f4dcff528/p0009/l0000",
+          "reference": "when Fleischman is at the helm.\"",
+          "v4": "when Fleischman is at the helm.\"",
+          "v5": "when Flelschman is at the helm.\""
+        }
+      ],
+      "summaries": {
+        "v4": {
+          "cer": 0.028283065367914563,
+          "denominator_policy": "micro edit sums / max(1, reference units); insertions may exceed 1",
+          "empty": 0,
+          "empty_without_error": 0,
+          "errors": 0,
+          "exact_match": 0.548,
+          "reference_characters": 17042,
+          "reference_words": 2886,
+          "taxonomy": {
+            "character_or_word_substitution": 40,
+            "exact": 274,
+            "punctuation_only": 54,
+            "spacing_only": 67,
+            "word_count_mismatch": 65
+          },
+          "warm_p50_seconds": 0.13667053199969814,
+          "warm_p95_seconds": 0.29678150699874095,
+          "wer": 0.16805266805266805,
+          "word_exact_match": 0.548
+        },
+        "v5": {
+          "cer": 0.013554747095411337,
+          "denominator_policy": "micro edit sums / max(1, reference units); insertions may exceed 1",
+          "empty": 0,
+          "empty_without_error": 0,
+          "errors": 0,
+          "exact_match": 0.848,
+          "reference_characters": 17042,
+          "reference_words": 2886,
+          "taxonomy": {
+            "character_or_word_substitution": 30,
+            "exact": 424,
+            "punctuation_only": 15,
+            "spacing_only": 15,
+            "word_count_mismatch": 16
+          },
+          "warm_p50_seconds": 0.13271768199956568,
+          "warm_p95_seconds": 0.2883034240003326,
+          "wer": 0.04435204435204435,
+          "word_exact_match": 0.848
+        }
+      }
+    },
+    "iiit5k": {
+      "count": 3000,
+      "directory": "results/recognizer-v5-iiit5k-baseline",
+      "evidence_sha256": {
+        "changes.json": "43cc5253af875f838d23ed5cd45dea7d7c75a4f8559f23eb8f6376a036d6f9ac",
+        "protocol.json": "0f783a96e958048a81c789451ac5e2e49a282231bd747b2ff1fc8478b1c0b6a1",
+        "v4.json": "69d6cb35cfd091203f52865aaf780f63d3a29dd5e37e91f054450a9aad6f9591",
+        "v5.json": "80c2fbe24d971136a53aae433ddeffe0fdc6a5cb713942aebdf6722f7c2321b8"
+      },
+      "improved": 93,
+      "initialization_and_warmup_seconds": {
+        "v4": 2.549310188000163,
+        "v5": 0.20233384399944043
+      },
+      "protocol": {
+        "assets": {
+          "v4": {
+            "inference.json": "7a2302e09f0d501458db082cbcf21cdcb3a8d6dc9a143f73b17e297505f922f9",
+            "inference.pdiparams": "75f64a1ffb70c56b7a25655963ca16f5bf3286202e3f52ac972bee05cdee2f56",
+            "inference.yml": "5f6b19b6b09b6b6f7924de6c25076d0b3528b6f641e64d4f12e6e6207ec33200"
+          },
+          "v5": {
+            "inference.json": "fd1b6ec722ea841a72d3ba43e527df1d1066d5d7808e0503ee3eec7265188753",
+            "inference.pdiparams": "3ec8a97ed6cefe8568d3e2ee90bb193299b566a7661aa4fd52d224b96b59f66b",
+            "inference.yml": "27e91d0582f40168aa218303c76e184bc78fa7a5d105aad0cfbad8458b441067"
+          }
+        },
+        "cpu_threads": 2,
+        "device": "cpu",
+        "enable_mkldnn": false,
+        "normalization": "casefold/collapsed whitespace; punctuation retained",
+        "provenance": {
+          "adapter_sha256": "566c33a30e006d072e009d15d5ef3d676066902939e02899bdb9a30c96078a7c",
+          "labels": "mirror CSV verbatim; CSV/MAT equivalence unverified",
+          "labels_sha256": "e1e84355cf9131c901a6d3181b6e191b0327b978bd5ceb59518a1298d06f078e"
+        },
+        "python": "3.12.14",
+        "runtime": {
+          "Pillow": "12.0.0",
+          "numpy": "2.5.4",
+          "paddleocr": "3.3.2",
+          "paddlepaddle": "3.2.2",
+          "paddlex": "3.3.13"
+        },
+        "scope": "iiit5k recognition only; previously exposed TEST; pretraining overlap unknown",
+        "source_sha256": {
+          "focuslens/assembly.py": "31fdc0b027c47523c048b134c8b75e855e958d93f2c3d2d13309924786c5485f",
+          "focuslens/benchmarks/metrics.py": "f6fb598be92d2cede31153e9860cf005a5a3dc791e597d33ce03401ca04f2e0c",
+          "focuslens/benchmarks/recognizer_comparison.py": "9c625f7ede54b588c7a23083aac965ea76ae9f4849e2972f7021c32a9d13c3df",
+          "focuslens/imaging.py": "aec4ef21a736cbb73505c1bdd9ba0ef6f6b2c174fa2dc2bc7d3c4011b3a3d8c7",
+          "focuslens/ocr.py": "b59131bd0152543e749817f1f82c76894b3fbc52c5b84d892af637ddb0ef270f"
+        },
+        "timing": "serial v4 then v5; one first-image warmup each; decode+prepare+OCR+assembly; disk reads excluded; single trial"
+      },
+      "regressed": 67,
+      "regressions": [
+        {
+          "id": "test/1023_13.png",
+          "reference": "41KM",
+          "v4": "41KM",
+          "v5": "41 KM"
+        },
+        {
+          "id": "test/1036_5.png",
+          "reference": "LABBIPET",
+          "v4": "LABBIPET",
+          "v5": "LABIPET"
+        },
+        {
+          "id": "test/1094_3.png",
+          "reference": "EXIT",
+          "v4": "EXIT",
+          "v5": "EXITT"
+        },
+        {
+          "id": "test/109_1.png",
+          "reference": "PSP",
+          "v4": "PSP",
+          "v5": "P5P"
+        },
+        {
+          "id": "test/138_6.png",
+          "reference": "LODGE",
+          "v4": "Lodge",
+          "v5": "Ledge"
+        },
+        {
+          "id": "test/142_2.png",
+          "reference": "CAR",
+          "v4": "Car",
+          "v5": "Gar"
+        },
+        {
+          "id": "test/174_1.png",
+          "reference": "VIDYANAGAR",
+          "v4": "VIDYANAGAR",
+          "v5": "VIDYA NAGAR"
+        },
+        {
+          "id": "test/2008_1.png",
+          "reference": "VALLEY",
+          "v4": "VALLEY",
+          "v5": "VALEY"
+        },
+        {
+          "id": "test/2012_1.png",
+          "reference": "VILLA",
+          "v4": "VILLA",
+          "v5": "MILLA"
+        },
+        {
+          "id": "test/2075_2.png",
+          "reference": "POINT",
+          "v4": "POINT",
+          "v5": "POLNT"
+        },
+        {
+          "id": "test/207_6.png",
+          "reference": "YOU",
+          "v4": "you",
+          "v5": "y o u"
+        },
+        {
+          "id": "test/2084_3.png",
+          "reference": "ARNTSEN",
+          "v4": "Arntsen",
+          "v5": "Arnitsen"
+        },
+        {
+          "id": "test/2095_2.png",
+          "reference": "LANDS",
+          "v4": "LANDS",
+          "v5": "LANIS"
+        },
+        {
+          "id": "test/2104_1.png",
+          "reference": "15",
+          "v4": "15",
+          "v5": "115"
+        },
+        {
+          "id": "test/2126_1.png",
+          "reference": "ZAJAZD",
+          "v4": "ZAJAZD",
+          "v5": "LAJAZD"
+        },
+        {
+          "id": "test/2128_8.png",
+          "reference": "OF",
+          "v4": "Of",
+          "v5": "①f"
+        },
+        {
+          "id": "test/2191_1.png",
+          "reference": "CONTACT",
+          "v4": "CONTACT",
+          "v5": "CNTACT"
+        },
+        {
+          "id": "test/2335_2.png",
+          "reference": "HAVEN",
+          "v4": "HAVEN",
+          "v5": "CHAVEN"
+        },
+        {
+          "id": "test/2351_1.png",
+          "reference": "KELLIMAR",
+          "v4": "Kellimar",
+          "v5": "Kellsmar"
+        },
+        {
+          "id": "test/2370_1.png",
+          "reference": "20721",
+          "v4": "20721",
+          "v5": "2721"
+        },
+        {
+          "id": "test/2444_1.png",
+          "reference": "TWIN",
+          "v4": "TWIN",
+          "v5": "NWIN"
+        },
+        {
+          "id": "test/2447_1.png",
+          "reference": "PROSPECT",
+          "v4": "PROSPECT",
+          "v5": "PROSPECH"
+        },
+        {
+          "id": "test/244_1.png",
+          "reference": "WWW",
+          "v4": "www",
+          "v5": "W"
+        },
+        {
+          "id": "test/2523_18.png",
+          "reference": "COTTAGE",
+          "v4": "COTTAGE",
+          "v5": "COOTAGE"
+        },
+        {
+          "id": "test/2524_45.png",
+          "reference": "FULLER",
+          "v4": "FULLER",
+          "v5": "PULLER"
+        },
+        {
+          "id": "test/2530_6.png",
+          "reference": "WARREN",
+          "v4": "Warren",
+          "v5": "Warron"
+        },
+        {
+          "id": "test/2578_5.png",
+          "reference": "CAFE",
+          "v4": "cafe",
+          "v5": "café"
+        },
+        {
+          "id": "test/2612_5.png",
+          "reference": "RAHUL",
+          "v4": "Rahul",
+          "v5": "Rakul"
+        },
+        {
+          "id": "test/264_1.png",
+          "reference": "NAHRUNGSERGANZUNG",
+          "v4": "Nahrungserganzung",
+          "v5": "Nahrungsergänzung"
+        },
+        {
+          "id": "test/290_3.png",
+          "reference": "S",
+          "v4": "S",
+          "v5": "5"
+        },
+        {
+          "id": "test/363_1.png",
+          "reference": "OPEN",
+          "v4": "OPEN",
+          "v5": "CDEN"
+        },
+        {
+          "id": "test/40_8.png",
+          "reference": "SPEEDLIMIT",
+          "v4": "SPEEDLIMIT",
+          "v5": "SPEED LIMIT"
+        },
+        {
+          "id": "test/41_1.png",
+          "reference": "LILLIPUT",
+          "v4": "Lilliput",
+          "v5": "Ulliput"
+        },
+        {
+          "id": "test/5018_2.png",
+          "reference": "DESTINEE",
+          "v4": "DESTINEE",
+          "v5": "DESTINÉE"
+        },
+        {
+          "id": "test/5020_8.png",
+          "reference": "WHO",
+          "v4": "WHO",
+          "v5": "..WHO"
+        },
+        {
+          "id": "test/5027_1.png",
+          "reference": "WILLIS",
+          "v4": "WILLIS",
+          "v5": "WILIS"
+        },
+        {
+          "id": "test/5027_14.png",
+          "reference": "RED",
+          "v4": "Red",
+          "v5": "Hed"
+        },
+        {
+          "id": "test/5027_6.png",
+          "reference": "COMEDIE",
+          "v4": "comedie",
+          "v5": "comédie"
+        },
+        {
+          "id": "test/5044_12.png",
+          "reference": "BURN",
+          "v4": "BURN",
+          "v5": "BLURN"
+        },
+        {
+          "id": "test/5044_8.png",
+          "reference": "SWINTON",
+          "v4": "SWINTON",
+          "v5": "SWINTION"
+        },
+        {
+          "id": "test/5062_6.png",
+          "reference": "KNIGHT",
+          "v4": "KNIGHT",
+          "v5": "KINIGHT"
+        },
+        {
+          "id": "test/5070_4.png",
+          "reference": "SWEENEY",
+          "v4": "SWEENEY",
+          "v5": "TSWEENEY"
+        },
+        {
+          "id": "test/5082_1.png",
+          "reference": "IRON",
+          "v4": "IRON",
+          "v5": "IRDN"
+        },
+        {
+          "id": "test/5084_6.png",
+          "reference": "BELL",
+          "v4": "BELL",
+          "v5": "BBELL"
+        },
+        {
+          "id": "test/5085_10.png",
+          "reference": "OPHULS",
+          "v4": "Ophuls",
+          "v5": "Ophüls"
+        },
+        {
+          "id": "test/5086_11.png",
+          "reference": "NICK",
+          "v4": "nICK",
+          "v5": "DICK"
+        },
+        {
+          "id": "test/5094_3.png",
+          "reference": "NAG",
+          "v4": "nAG",
+          "v5": "OAG"
+        },
+        {
+          "id": "test/5103_12.png",
+          "reference": "HURT",
+          "v4": "HURT",
+          "v5": "BURT"
+        },
+        {
+          "id": "test/5103_14.png",
+          "reference": "ROSSELLINI",
+          "v4": "ROSSELLINI",
+          "v5": "BOSSELLINI"
+        },
+        {
+          "id": "test/5114_3.png",
+          "reference": "CRYSTAL",
+          "v4": "CRYSTAL",
+          "v5": "ERYSTAL"
+        },
+        {
+          "id": "test/5132_2.png",
+          "reference": "ULTIMATE",
+          "v4": "ULTIMATE",
+          "v5": "ULTMATE"
+        },
+        {
+          "id": "test/5147_3.png",
+          "reference": "LEGACY",
+          "v4": "LEGACY",
+          "v5": "L EG ACY"
+        },
+        {
+          "id": "test/5152_7.png",
+          "reference": "3D",
+          "v4": "3D",
+          "v5": "BD"
+        },
+        {
+          "id": "test/5153_1.png",
+          "reference": "DENZEL",
+          "v4": "DENZEL",
+          "v5": "DENIZEL"
+        },
+        {
+          "id": "test/5154_2.png",
+          "reference": "BEFORE",
+          "v4": "BEFORE",
+          "v5": "BFORE"
+        },
+        {
+          "id": "test/5167_2.png",
+          "reference": "SOLOIST",
+          "v4": "SOLOIST",
+          "v5": "SOOLOIST"
+        },
+        {
+          "id": "test/5169_1.png",
+          "reference": "HARRY",
+          "v4": "Harry",
+          "v5": "Harfy"
+        },
+        {
+          "id": "test/5197_4.png",
+          "reference": "SOON",
+          "v4": "SOON",
+          "v5": "SON"
+        },
+        {
+          "id": "test/5202_6.png",
+          "reference": "SERA",
+          "v4": "SERA",
+          "v5": "SERÁ"
+        },
+        {
+          "id": "test/629_2.png",
+          "reference": "CENTER",
+          "v4": "CENTER",
+          "v5": "GENTER"
+        },
+        {
+          "id": "test/64_4.png",
+          "reference": "INDIA",
+          "v4": "India",
+          "v5": "Indla"
+        },
+        {
+          "id": "test/754_1.png",
+          "reference": "FEATURING",
+          "v4": "FEATURING",
+          "v5": "FENTURING"
+        },
+        {
+          "id": "test/777_2.png",
+          "reference": "COMES",
+          "v4": "COMES",
+          "v5": "CCOMES"
+        },
+        {
+          "id": "test/817_1.png",
+          "reference": "CAN",
+          "v4": "Can",
+          "v5": "Gan"
+        },
+        {
+          "id": "test/940_5.png",
+          "reference": "BILLBOARDS",
+          "v4": "BillboARdS",
+          "v5": "Billbords"
+        },
+        {
+          "id": "test/967_4.png",
+          "reference": "PARISIAN",
+          "v4": "PARISIAN",
+          "v5": "P.A:R·ISIA.N"
+        },
+        {
+          "id": "test/983_4.png",
+          "reference": "INDIA",
+          "v4": "India",
+          "v5": "Indla"
+        }
+      ],
+      "summaries": {
+        "v4": {
+          "cer": 0.04119457724801886,
+          "denominator_policy": "micro edit sums / max(1, reference units); insertions may exceed 1",
+          "empty": 1,
+          "empty_without_error": 1,
+          "errors": 0,
+          "exact_match": 0.8383333333333334,
+          "reference_characters": 15269,
+          "reference_words": 3000,
+          "taxonomy": {
+            "character_or_word_substitution": 162,
+            "empty": 1,
+            "exact": 2515,
+            "punctuation_only": 314,
+            "spacing_only": 6,
+            "word_count_mismatch": 2
+          },
+          "warm_p50_seconds": 0.06695837499864865,
+          "warm_p95_seconds": 0.08524212500014983,
+          "wer": 0.16466666666666666,
+          "word_exact_match": 0.8383333333333334
+        },
+        "v5": {
+          "cer": 0.039098827690091036,
+          "denominator_policy": "micro edit sums / max(1, reference units); insertions may exceed 1",
+          "empty": 0,
+          "empty_without_error": 0,
+          "errors": 0,
+          "exact_match": 0.847,
+          "reference_characters": 15269,
+          "reference_words": 3000,
+          "taxonomy": {
+            "character_or_word_substitution": 163,
+            "exact": 2541,
+            "punctuation_only": 282,
+            "spacing_only": 9,
+            "word_count_mismatch": 5
+          },
+          "warm_p50_seconds": 0.06668369399994845,
+          "warm_p95_seconds": 0.08505153799887921,
+          "wer": 0.15933333333333333,
+          "word_exact_match": 0.847
+        }
+      }
+    }
+  },
+  "scout_id": "ses_e9cd38b49ffeA0DkmW5cTtxvh8",
+  "version": 1
+}

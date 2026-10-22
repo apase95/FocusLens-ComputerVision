@@ -4,6 +4,26 @@ The root MIT license covers original FocusLens code and documentation only.
 It does not replace upstream licenses on firmware, datasets, dependencies or
 downloaded models. License declarations below were checked on 2026-10-21.
 
+## Planned Luckfox deployment — assets not yet selected
+
+The [offline architecture](docs/OFFLINE_ARCHITECTURE.md) is a target, not a
+distribution of an embedded runtime. Luckfox BSP/kernel components, Rockchip
+RKNN tools/runtime, converted models, dictionary entries, IPA, fonts, audio,
+TTS engines and voices each require exact-version license review and applicable
+notices before packaging. Root MIT does not cover these assets; SQLite as a
+storage format confers no rights to dictionary content.
+
+Do not scrape or redistribute Cambridge/Oxford recordings on the assumption
+they are free. Select explicitly licensed EN–VI/IPA content and recordings, or
+an offline TTS engine **and voice** whose terms permit the intended distribution.
+English speech is the first target; Vietnamese reading needs separate engine,
+voice, ARM32 and licensing validation. No such corpus/voice is supplied here.
+Vietnamese and IPA font coverage and font redistribution terms must also pass
+review. Track source, revision, hash, attribution and conversion steps in the
+future device asset manifest; retain upstream notices for redistributed BSP/SDK
+components. See [hardware sources](docs/LUCKFOX_HARDWARE.md) for vendor references,
+not an assertion that all SDK components share one license.
+
 ## Espressif CameraWebServer — Apache-2.0
 
 `CameraWebServer/` derives from the Arduino-ESP32 **3.3.12** example:
@@ -53,10 +73,15 @@ have their own licenses; this is not a claim that all dependencies are MIT or Ap
 | PP-OCRv5_mobile_det | [PaddlePaddle model card](https://huggingface.co/PaddlePaddle/PP-OCRv5_mobile_det/blob/main/README.md), `license: apache-2.0` |
 | en_PP-OCRv4_mobile_rec | [PaddlePaddle model card](https://huggingface.co/PaddlePaddle/en_PP-OCRv4_mobile_rec/blob/main/README.md), `license: apache-2.0` |
 
-The new default `en_PP-OCRv5_mobile_rec` is not redistributed. Consult its
-[official model card](https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec/blob/main/README.md)
-and the exact downloaded artifact license before provisioning; this migration
-has not independently rechecked that card or downloaded v5 weights.
+The default `en_PP-OCRv5_mobile_rec` was provisioned on 2026-10-22 from the
+official PaddlePaddle Hugging Face repository. The official API/model card
+declares `apache-2.0` at immutable revision
+`267c36e24c331595590fe7bd72bde2436fd286f2`:
+[pinned model card](https://huggingface.co/PaddlePaddle/en_PP-OCRv5_mobile_rec/blob/267c36e24c331595590fe7bd72bde2436fd286f2/README.md).
+Parameter SHA256: `3ec8a97ed6cefe8568d3e2ee90bb193299b566a7661aa4fd52d224b96b59f66b`.
+Weights, cached card and API metadata are ignored, not redistributed. The tracked
+v5 baseline records provenance and all downloaded file hashes. Retain the model
+card and Apache license/notices if redistributing; root MIT does not relicense it.
 
 These declarations are evidence for the named models, checked independently of
 the software licenses. Current runtime requires pre-provisioned local weights and they are

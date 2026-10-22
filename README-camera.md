@@ -1,5 +1,10 @@
 # ESP32-CAM OV3660 — lịch sử và kiểm tra cục bộ
 
+> Tài liệu legacy, giữ để tái lập thử nghiệm ESP32/host. Mục tiêu hiện tại là
+> [Luckfox Pico Max với camera CSI cục bộ](docs/LUCKFOX_HARDWARE.md), không cần
+> camera HTTP hoặc server LAN. Firmware/pinout ESP32 bên dưới không áp dụng cho
+> Luckfox; chưa có kiểm tra phần cứng Luckfox trong dự án.
+
 Chạy các lệnh từ thư mục gốc của repository.
 Arduino CLI **1.5.1**: `.camera-tools/bin/arduino-cli`; core Espressif
 **3.3.12**: `.camera-tools/data/packages/esp32/hardware/esp32/3.3.12`.
